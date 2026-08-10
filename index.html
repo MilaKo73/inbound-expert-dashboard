@@ -934,6 +934,12 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;currency&quot;&gt;견적 통화
         &lt;select class=&quot;form-select&quot; id=&quot;currency&quot;&gt;&lt;option&gt;KRW&lt;/option&gt;&lt;option&gt;USD&lt;/option&gt;&lt;/select&gt;
       &lt;/label&gt;
+      &lt;label class=&quot;form-label&quot; for=&quot;additionalCostName&quot;&gt;기타 추가 비용 항목
+        &lt;input class=&quot;form-control&quot; id=&quot;additionalCostName&quot; type=&quot;text&quot; placeholder=&quot;예: 검사비, 보관료, 위험물 할증&quot;&gt;
+      &lt;/label&gt;
+      &lt;label class=&quot;form-label&quot; for=&quot;additionalCost&quot;&gt;기타 추가 비용 금액
+        &lt;input class=&quot;form-control&quot; id=&quot;additionalCost&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;1000&quot; value=&quot;0&quot; inputmode=&quot;numeric&quot;&gt;
+      &lt;/label&gt;
       &lt;button class=&quot;btn&quot; id=&quot;partnerRecommend&quot; type=&quot;button&quot;&gt;파트너 2곳 추천&lt;/button&gt;
     &lt;/div&gt;
     &lt;div class=&quot;dash-split&quot;&gt;
@@ -955,6 +961,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           &lt;tr id=&quot;previewOriginRow&quot; hidden&gt;&lt;th scope=&quot;row&quot;&gt;출고지 주소&lt;/th&gt;&lt;td id=&quot;previewOrigin&quot;&gt;입력 필요&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;최종 도착지 운송료&lt;/th&gt;&lt;td id=&quot;safeRateStatus&quot;&gt;안전운임제 DB 로드 중&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;계산 기준&lt;/th&gt;&lt;td id=&quot;previewBasis&quot;&gt;컨테이너 × 1&lt;/td&gt;&lt;/tr&gt;
+          &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;기타 추가 비용&lt;/th&gt;&lt;td id=&quot;previewAdditional&quot;&gt;없음&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;물류비 합계&lt;/th&gt;&lt;td id=&quot;previewLogistics&quot;&gt;—&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;관세·세금&lt;/th&gt;&lt;td&gt;승인 세율 입력 필요&lt;/td&gt;&lt;/tr&gt;
         &lt;/tbody&gt;&lt;/table&gt;
@@ -980,6 +987,8 @@ html&gt;body{padding:0}&lt;/style&gt;
       const safeRateLookup = root.querySelector(&#x27;#safeRateLookup&#x27;);
       const quantity = root.querySelector(&#x27;#quantity&#x27;);
       const currency = root.querySelector(&#x27;#currency&#x27;);
+      const additionalCostName = root.querySelector(&#x27;#additionalCostName&#x27;);
+      const additionalCost = root.querySelector(&#x27;#additionalCost&#x27;);
       const partnerRecommend = root.querySelector(&#x27;#partnerRecommend&#x27;);
       const partnerStatus = root.querySelector(&#x27;#partnerStatus&#x27;);
       const partnerList = root.querySelector(&#x27;#partnerList&#x27;);
@@ -1030,23 +1039,29 @@ html&gt;body{padding:0}&lt;/style&gt;
         });
       }
       function selectedCosts() {
-        return costs[mode.value].map(item =&gt; item[0] === &#x27;내륙운송&#x27; &amp;&amp; mode.value === &#x27;FCL&#x27; ? [item[0], item[1], safeRate ? safeRate.amount : null] : item);
+        const selected = costs[mode.value].map(item =&gt; item[0] === &#x27;내륙운송&#x27; &amp;&amp; mode.value === &#x27;FCL&#x27; ? [item[0], item[1], safeRate ? safeRate.amount : null] : item);
+        const extra = Math.max(0, Number(additionalCost.value) || 0);
+        if (extra) selected.push([additionalCostName.value.trim() || &#x27;기타 추가 비용&#x27;, &#x27;건별&#x27;, extra, true]);
+        return selected;
       }
       function render() {
         const selected = selectedCosts();
         const q = Math.max(1, Number(quantity.value) || 1);
         const isFcl = mode.value === &#x27;FCL&#x27;;
         const requiresOrigin = incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;;
+        const lineAmount = item =&gt; item[3] ? item[2] : item[2] * q;
         const known = selected.filter(item =&gt; Number.isFinite(item[2]));
         const hasMissing = selected.some(item =&gt; !Number.isFinite(item[2]));
-        const sum = known.reduce((total, item) =&gt; total + item[2] * q, 0);
-        const maximum = Math.max(1, ...known.map(item =&gt; item[2] * q));
+        const sum = known.reduce((total, item) =&gt; total + lineAmount(item), 0);
+        const maximum = Math.max(1, ...known.map(lineAmount));
         root.querySelector(&#x27;#basisLabel&#x27;).textContent = isFcl ? &#x27;컨테이너 수&#x27; : &#x27;CBM/W·M 수량&#x27;;
         root.querySelector(&#x27;#previewIncoterm&#x27;).textContent = incoterm.value + &#x27; 2020&#x27;;
         root.querySelector(&#x27;#previewPol&#x27;).textContent = pol.value || &#x27;미선택&#x27;;
         root.querySelector(&#x27;#previewPod&#x27;).textContent = port.options[port.selectedIndex].text;
         root.querySelector(&#x27;#previewMode&#x27;).textContent = mode.value;
         root.querySelector(&#x27;#previewBasis&#x27;).textContent = (isFcl ? equipment.value + &#x27;FT 컨테이너 × &#x27; : &#x27;W·M/CBM × &#x27;) + q;
+        const extra = Math.max(0, Number(additionalCost.value) || 0);
+        root.querySelector(&#x27;#previewAdditional&#x27;).textContent = extra ? `${additionalCostName.value.trim() || &#x27;기타 추가 비용&#x27;} · ${format(extra)}` : &#x27;없음&#x27;;
         root.querySelector(&#x27;#previewOriginRow&#x27;).hidden = !requiresOrigin;
         root.querySelector(&#x27;#previewOrigin&#x27;).textContent = originAddress.value.trim() || &#x27;입력 필요&#x27;;
         originAddress.disabled = !requiresOrigin;
@@ -1061,7 +1076,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         root.querySelector(&#x27;#previewLogistics&#x27;).textContent = hasMissing ? &#x27;운송료 조회 후 확정&#x27; : format(sum);
         root.querySelector(&#x27;#total&#x27;).textContent = hasMissing ? &#x27;운송료 조회 필요&#x27; : format(sum) + &#x27; + 세금&#x27;;
         rows.replaceChildren(...selected.map(item =&gt; {
-          const amount = Number.isFinite(item[2]) ? item[2] * q : null;
+          const amount = Number.isFinite(item[2]) ? lineAmount(item) : null;
           const line = document.createElement(&#x27;div&#x27;);
           line.className = &#x27;dash-cost&#x27;;
           line.innerHTML = `&lt;span&gt;${item[0]}&lt;br&gt;&lt;span class=&quot;text-small text-muted&quot;&gt;${item[1]}&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;dash-bar&quot; aria-hidden=&quot;true&quot;&gt;&lt;span style=&quot;width:${amount === null ? 0 : Math.round(amount / maximum * 100)}%&quot;&gt;&lt;/span&gt;&lt;/span&gt;&lt;strong class=&quot;text-end&quot;&gt;${amount === null ? &#x27;RATE_REQUIRED&#x27; : format(amount)}&lt;/strong&gt;`;
@@ -1089,7 +1104,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       });
       finalDestination.addEventListener(&#x27;input&#x27;, () =&gt; { safeRate = null; safeRateMessage = finalDestination.value.trim() ? &#x27;안전운임제 DB 조회 대기&#x27; : &#x27;주소 입력 후 안전운임제 DB 조회&#x27;; render(); });
       originAddress.addEventListener(&#x27;input&#x27;, render);
-      [incoterm, pol, mode, port, equipment, quantity, currency].forEach(input =&gt; [&#x27;input&#x27;, &#x27;change&#x27;].forEach(event =&gt; input.addEventListener(event, () =&gt; { if (input === mode || input === port || input === equipment) safeRate = null; render(); })));
+      [incoterm, pol, mode, port, equipment, quantity, currency, additionalCostName, additionalCost].forEach(input =&gt; [&#x27;input&#x27;, &#x27;change&#x27;].forEach(event =&gt; input.addEventListener(event, () =&gt; { if (input === mode || input === port || input ===equipment) safeRate = null; render(); })));
       partnerRecommend.addEventListener(&#x27;click&#x27;, recommendPartners);
       pol.addEventListener(&#x27;input&#x27;, () =&gt; { partnerList.replaceChildren(); partnerStatus.textContent = pol.value.trim() ? &#x27;POL 입력 완료 · 파트너 2곳 추천 버튼을 눌러 확인하세요.&#x27; : &#x27;해외 POL 또는 국가·도시를 입력해 주세요.&#x27;; });
       render();
