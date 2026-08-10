@@ -1027,6 +1027,8 @@ html&gt;body{padding:0}&lt;/style&gt;
       const pol = root.querySelector(&#x27;#pol&#x27;);
       const mode = root.querySelector(&#x27;#mode&#x27;);
       const port = root.querySelector(&#x27;#port&#x27;);
+      const FCL_PORTS = Array.from(port.options).map(option =&gt; ({ value: option.value, label: option.textContent }));
+      const LCL_PORTS = [{ value: &#x27;lcl-busan&#x27;, label: &#x27;부산항&#x27; }, { value: &#x27;lcl-incheon&#x27;, label: &#x27;인천항&#x27; }];
       const equipment = root.querySelector(&#x27;#equipment&#x27;);
       const packageCount = root.querySelector(&#x27;#packageCount&#x27;);
       const finalDestination = root.querySelector(&#x27;#finalDestination&#x27;);
@@ -1077,6 +1079,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       let safeDb = null;
       let safeRate = null;
       let destinationChargeCurrency = &#x27;USD&#x27;;
+      let renderedPortMode = null;
       let safeRateMessage = &#x27;안전운임제 DB 로드 중&#x27;;
       const normalize = value =&gt; String(value || &#x27;&#x27;).replace(/[\s,]/g, &#x27;&#x27;);
       const format = (value, currency) =&gt; new Intl.NumberFormat(&#x27;ko-KR&#x27;, { maximumFractionDigits: 0 }).format(value) + &#x27; &#x27; + currency;
@@ -1223,7 +1226,19 @@ html&gt;body{padding:0}&lt;/style&gt;
         if (Number.isFinite(krw) &amp;&amp; krw &gt;= 0) totals.push(format(krw, &#x27;KRW&#x27;));
         root.querySelector(&#x27;#previewLogistics&#x27;).textContent = totals.length ? totals.join(&#x27; + &#x27;) : &#x27;금액 입력 필요&#x27;;
       }
+      function syncPortOptions() {
+        if (renderedPortMode === mode.value) return;
+        const options = mode.value === &#x27;FCL&#x27; ? FCL_PORTS : LCL_PORTS;
+        port.replaceChildren(...options.map(item =&gt; {
+          const option = document.createElement(&#x27;option&#x27;);
+          option.value = item.value;
+          option.textContent = item.label;
+          return option;
+        }));
+        renderedPortMode = mode.value;
+      }
       function render() {
+        syncPortOptions();
         const selected = selectedCosts();
         const q = Math.max(1, Number(quantity.value) || 1);
         const isFcl = mode.value === &#x27;FCL&#x27;;
@@ -1256,7 +1271,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         originAddress.disabled = !requiresOrigin;
         originAddress.placeholder = requiresOrigin ? &#x27;출고지 상세 주소 입력&#x27; : &#x27;EXW/FCA 선택 시 입력&#x27;;
         finalDestination.disabled = !isFcl;
-        port.disabled = !isFcl;
+        port.disabled = false;
         equipment.hidden = !isFcl;
         equipment.disabled = !isFcl;
         packageCount.hidden = isFcl;
