@@ -1074,7 +1074,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       }
       const costs = {
         FCL: [[&#x27;해상 운임&#x27;, &#x27;컨테이너&#x27;, 850, &#x27;USD&#x27;], [&#x27;도착지 부대비용&#x27;, &#x27;도착지 확인&#x27;, null, &#x27;USD&#x27;], [&#x27;도착지 THC외&#x27;, &#x27;컨테이너&#x27;, 360000, &#x27;KRW&#x27;], [&#x27;내륙운송&#x27;, &#x27;안전운임제 DB&#x27;, null, &#x27;KRW&#x27;], [&#x27;통관 수수료&#x27;, &#x27;신고 건&#x27;, 180000, &#x27;KRW&#x27;], [&#x27;항만 보안·서류비&#x27;, &#x27;신고 건&#x27;, 55000, &#x27;KRW&#x27;]],
-        LCL: [[&#x27;LCL 해상 운임&#x27;, &#x27;최종 CBM&#x27;, 180, &#x27;USD&#x27;], [&#x27;도착지 부대비용&#x27;, &#x27;도착지 확인&#x27;, null, &#x27;USD&#x27;], [&#x27;CFS 반출·취급&#x27;, &#x27;최종 CBM&#x27;, 95000, &#x27;KRW&#x27;], [&#x27;내륙운송&#x27;, &#x27;차량·CBM&#x27;, 160000, &#x27;KRW&#x27;], [&#x27;통관 수수료&#x27;, &#x27;신고 건&#x27;, 180000, &#x27;KRW&#x27;], [&#x27;항만 보안·서류비&#x27;, &#x27;신고 건&#x27;, 55000, &#x27;KRW&#x27;]]
+        LCL: [[&#x27;LCL 해상 운임&#x27;, &#x27;최종 CBM&#x27;, 180, &#x27;USD&#x27;], [&#x27;도착지 부대비용&#x27;, &#x27;도착지 확인&#x27;, null, &#x27;USD&#x27;], [&#x27;CFS 반출·취급&#x27;, &#x27;최종 CBM&#x27;, 95000, &#x27;KRW&#x27;], [&#x27;도착지 CFS 창고료&#x27;, &#x27;실비&#x27;, null, &#x27;KRW&#x27;, true, &#x27;실비&#x27;], [&#x27;내륙운송&#x27;, &#x27;별도 확인&#x27;, null, &#x27;KRW&#x27;, true, &#x27;별도 확인&#x27;], [&#x27;통관 수수료&#x27;, &#x27;신고 건&#x27;, 180000, &#x27;KRW&#x27;], [&#x27;항만 보안·서류비&#x27;, &#x27;신고 건&#x27;, 55000, &#x27;KRW&#x27;]]
       };
       let safeDb = null;
       let safeRate = null;
@@ -1278,7 +1278,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         packageCount.disabled = isFcl;
         safeRateLookup.disabled = !isFcl || !safeDb;
         root.querySelector(&#x27;#safeRateHelp&#x27;).textContent = isFcl ? &#x27;FCL 전용 · 시도·시군구·행정동까지 입력&#x27; : &#x27;LCL에서는 안전운임제 DB 조회를 사용할 수 없습니다&#x27;;
-        root.querySelector(&#x27;#safeRateStatus&#x27;).textContent = isFcl ? safeRateMessage : &#x27;FCL 전용 기능&#x27;;
+        root.querySelector(&#x27;#safeRateStatus&#x27;).textContent = isFcl ? safeRateMessage : &#x27;운송료 별도 확인&#x27;;
         root.querySelector(&#x27;#foreignCurrencySummary&#x27;).textContent = FOREIGN_CURRENCY;
         root.querySelector(&#x27;#exwCurrencySummary&#x27;).textContent = FOREIGN_CURRENCY;
         root.querySelector(&#x27;#quoteForeignCurrency&#x27;).textContent = FOREIGN_CURRENCY;
