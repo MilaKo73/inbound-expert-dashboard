@@ -905,11 +905,11 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
     @media (max-width: 560px) { #fcl-lcl-dashboard .dash-split { grid-template-columns:1fr; } }
   &lt;/style&gt;
-  &lt;nav class=&quot;viz-row&quot; aria-label=&quot;주요 메뉴&quot;&gt;
-    &lt;button class=&quot;btn btn-primary&quot; id=&quot;quoteMenu&quot; type=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;수입 견적&lt;/button&gt;
-    &lt;button class=&quot;btn&quot; id=&quot;partnerManageMenu&quot; type=&quot;button&quot; aria-pressed=&quot;false&quot;&gt;해외 파트너 관리&lt;/button&gt;
+  &lt;nav class=&quot;viz-row&quot; aria-label=&quot;업무 SHEET&quot; role=&quot;tablist&quot;&gt;
+    &lt;button class=&quot;btn btn-primary&quot; id=&quot;quoteMenu&quot; type=&quot;button&quot; role=&quot;tab&quot; aria-selected=&quot;true&quot; aria-controls=&quot;quoteView&quot;&gt;수입견적 SHEET&lt;/button&gt;
+    &lt;button class=&quot;btn&quot; id=&quot;partnerManageMenu&quot; type=&quot;button&quot; role=&quot;tab&quot; aria-selected=&quot;false&quot; aria-controls=&quot;partnerManageView&quot;&gt;해외 파트너 관리 SHEET&lt;/button&gt;
   &lt;/nav&gt;
-  &lt;div class=&quot;dash-layout&quot; id=&quot;quoteView&quot;&gt;
+  &lt;div class=&quot;dash-layout&quot; id=&quot;quoteView&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;quoteMenu&quot;&gt;
     &lt;div class=&quot;viz-row&quot;&gt;&lt;h2&gt;해상 수입 견적 구성&lt;/h2&gt;&lt;span class=&quot;viz-badge&quot;&gt;INDICATIVE&lt;/span&gt;&lt;/div&gt;
     &lt;div class=&quot;viz-controls&quot; aria-label=&quot;견적 조건&quot;&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;incoterm&quot;&gt;Incoterms 2020
@@ -986,7 +986,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;/div&gt;
     &lt;div class=&quot;dash-rule text-small text-muted&quot;&gt;안전운임제 DB는 2026년 8월 제공 파일의 항만별 행정동·20FT/40FT 안전위탁운임을 사용합니다. 주소 미일치 또는 LCL은 운송료를 확정하지 않습니다.&lt;/div&gt;
   &lt;/div&gt;
-  &lt;section id=&quot;partnerManageView&quot; hidden aria-labelledby=&quot;partner-manage-title&quot;&gt;
+  &lt;section id=&quot;partnerManageView&quot; hidden role=&quot;tabpanel&quot; aria-labelledby=&quot;partnerManageMenu partner-manage-title&quot;&gt;
     &lt;div class=&quot;viz-row&quot;&gt;&lt;h2 id=&quot;partner-manage-title&quot;&gt;해외 파트너 관리&lt;/h2&gt;&lt;span class=&quot;viz-badge&quot; id=&quot;partnerManageCount&quot;&gt;0곳&lt;/span&gt;&lt;/div&gt;
     &lt;div class=&quot;viz-controls&quot; aria-label=&quot;파트너 검색 및 입력&quot;&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;partnerSearch&quot;&gt;파트너 검색
@@ -1181,8 +1181,8 @@ html&gt;body{padding:0}&lt;/style&gt;
         partnerManageView.hidden = isQuote;
         quoteMenu.classList.toggle(&#x27;btn-primary&#x27;, isQuote);
         partnerManageMenu.classList.toggle(&#x27;btn-primary&#x27;, !isQuote);
-        quoteMenu.setAttribute(&#x27;aria-pressed&#x27;, String(isQuote));
-        partnerManageMenu.setAttribute(&#x27;aria-pressed&#x27;, String(!isQuote));
+        quoteMenu.setAttribute(&#x27;aria-selected&#x27;, String(isQuote));
+        partnerManageMenu.setAttribute(&#x27;aria-selected&#x27;, String(!isQuote));
         if (!isQuote) renderPartnerManagement();
       }
       function savePartner() {
@@ -1293,6 +1293,13 @@ html&gt;body{padding:0}&lt;/style&gt;
       pol.addEventListener(&#x27;input&#x27;, () =&gt; { partnerList.replaceChildren(); partnerStatus.textContent = pol.value.trim() ? &#x27;POL 입력 완료 · 파트너 2곳 추천 버튼을 눌러 확인하세요.&#x27; : &#x27;해외 POL 또는 국가·도시를 입력해 주세요.&#x27;; });
       quoteMenu.addEventListener(&#x27;click&#x27;, () =&gt; showMenu(&#x27;quote&#x27;));
       partnerManageMenu.addEventListener(&#x27;click&#x27;, () =&gt; showMenu(&#x27;partners&#x27;));
+      [quoteMenu, partnerManageMenu].forEach(tab =&gt; tab.addEventListener(&#x27;keydown&#x27;, event =&gt; {
+        if (![&#x27;ArrowLeft&#x27;, &#x27;ArrowRight&#x27;].includes(event.key)) return;
+        event.preventDefault();
+        const target = tab === quoteMenu ? partnerManageMenu : quoteMenu;
+        showMenu(target === quoteMenu ? &#x27;quote&#x27; : &#x27;partners&#x27;);
+        target.focus();
+      }));
       partnerSearch.addEventListener(&#x27;input&#x27;, renderPartnerManagement);
       partnerSave.addEventListener(&#x27;click&#x27;, savePartner);
       partnerCancelEdit.addEventListener(&#x27;click&#x27;, clearPartnerForm);
