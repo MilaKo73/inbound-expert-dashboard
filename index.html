@@ -899,6 +899,15 @@ html&gt;body{padding:0}&lt;/style&gt;
     #fcl-lcl-dashboard .dash-bar &gt; span { display:block; height:100%; width:0; background:var(--blue); transition:width 220ms ease; }
     #fcl-lcl-dashboard .dash-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     #fcl-lcl-dashboard .dash-rule { padding-top:10px; border-top:1px solid color-mix(in srgb, var(--blue) 40%, var(--border)); }
+    #fcl-lcl-dashboard .print-only { display:none; }
+    @media print {
+      @page { size:A4 portrait; margin:12mm; }
+      #fcl-lcl-dashboard .viz-controls, #fcl-lcl-dashboard .viz-badge, #fcl-lcl-dashboard .dash-summary, #fcl-lcl-dashboard #partner-title, #fcl-lcl-dashboard #partnerStatus, #fcl-lcl-dashboard #partnerList, #fcl-lcl-dashboard .dash-rule { display:none !important; }
+      #fcl-lcl-dashboard .print-only { display:block; }
+      #fcl-lcl-dashboard .dash-layout, #fcl-lcl-dashboard .dash-split { display:block; }
+      #fcl-lcl-dashboard .dash-split &gt; * { margin-top:12px; }
+      #fcl-lcl-dashboard .dash-cost + .dash-cost { margin-top:6px; }
+    }
     @media (max-width: 560px) { #fcl-lcl-dashboard .dash-split { grid-template-columns:1fr; } #fcl-lcl-dashboard .dash-cost { grid-template-columns:1fr 74px 88px; } }
   &lt;/style&gt;
   &lt;div class=&quot;dash-layout&quot;&gt;
@@ -941,6 +950,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         &lt;input class=&quot;form-control&quot; id=&quot;additionalCost&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;1000&quot; value=&quot;0&quot; inputmode=&quot;numeric&quot;&gt;
       &lt;/label&gt;
       &lt;button class=&quot;btn&quot; id=&quot;partnerRecommend&quot; type=&quot;button&quot;&gt;파트너 2곳 추천&lt;/button&gt;
+      &lt;button class=&quot;btn btn-primary&quot; id=&quot;pdfPreview&quot; type=&quot;button&quot;&gt;A4 PDF 미리보기&lt;/button&gt;
     &lt;/div&gt;
     &lt;div class=&quot;dash-split&quot;&gt;
       &lt;div class=&quot;card viz-stat&quot;&gt;&lt;div class=&quot;text-muted&quot;&gt;견적 합계 (통화별)&lt;/div&gt;&lt;div class=&quot;viz-stat-value&quot; id=&quot;total&quot;&gt;운송료 조회 필요&lt;/div&gt;&lt;div class=&quot;text-small text-muted&quot; id=&quot;totalNote&quot;&gt;환율 미적용 · USD/KRW를 분리 표기&lt;/div&gt;&lt;/div&gt;
@@ -950,8 +960,9 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;dash-split&quot;&gt;
-      &lt;section aria-labelledby=&quot;breakdown-title&quot;&gt;&lt;h3 id=&quot;breakdown-title&quot;&gt;고객 표시 비용 내역&lt;/h3&gt;&lt;div id=&quot;costRows&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;&lt;/section&gt;
+      &lt;section aria-labelledby=&quot;breakdown-title&quot;&gt;&lt;h3 id=&quot;breakdown-title&quot;&gt;해상 수입 비용 내역&lt;/h3&gt;&lt;div id=&quot;costRows&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;&lt;/section&gt;
       &lt;section class=&quot;card&quot; aria-labelledby=&quot;quote-title&quot;&gt;
+        &lt;h2 class=&quot;print-only&quot;&gt;해상 수입 견적서&lt;/h2&gt;
         &lt;h3 id=&quot;quote-title&quot;&gt;고객 견적서 미리보기&lt;/h3&gt;
         &lt;table class=&quot;table table-sm&quot;&gt;&lt;tbody&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;견적 상태&lt;/th&gt;&lt;td&gt;INDICATIVE&lt;/td&gt;&lt;/tr&gt;
@@ -991,6 +1002,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       const additionalCostName = root.querySelector(&#x27;#additionalCostName&#x27;);
       const additionalCost = root.querySelector(&#x27;#additionalCost&#x27;);
       const partnerRecommend = root.querySelector(&#x27;#partnerRecommend&#x27;);
+      const pdfPreview = root.querySelector(&#x27;#pdfPreview&#x27;);
       const partnerStatus = root.querySelector(&#x27;#partnerStatus&#x27;);
       const partnerList = root.querySelector(&#x27;#partnerList&#x27;);
       const rows = root.querySelector(&#x27;#costRows&#x27;);
@@ -1112,6 +1124,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       originAddress.addEventListener(&#x27;input&#x27;, render);
       [incoterm, pol, mode, port, equipment, quantity, additionalCostName, additionalCost].forEach(input =&gt; [&#x27;input&#x27;, &#x27;change&#x27;].forEach(event =&gt; input.addEventListener(event, () =&gt; { if (input === mode || input === port || input === equipment) safeRate = null; render(); })));
       partnerRecommend.addEventListener(&#x27;click&#x27;, recommendPartners);
+      pdfPreview.addEventListener(&#x27;click&#x27;, () =&gt; window.print());
       pol.addEventListener(&#x27;input&#x27;, () =&gt; { partnerList.replaceChildren(); partnerStatus.textContent = pol.value.trim() ? &#x27;POL 입력 완료 · 파트너 2곳 추천 버튼을 눌러 확인하세요.&#x27; : &#x27;해외 POL 또는 국가·도시를 입력해 주세요.&#x27;; });
       render();
       loadSafeDb();
