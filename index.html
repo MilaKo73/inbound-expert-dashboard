@@ -929,13 +929,13 @@ html&gt;body{padding:0}&lt;/style&gt;
         &lt;input class=&quot;form-control&quot; id=&quot;quantity&quot; type=&quot;number&quot; min=&quot;1&quot; step=&quot;1&quot; value=&quot;1&quot;&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;pol&quot;&gt;POL (해외 선적항 / 국가·도시)
-        &lt;input class=&quot;form-control&quot; id=&quot;pol&quot; type=&quot;text&quot; placeholder=&quot;예: Shanghai, China / Singapore&quot;&gt;
+        &lt;input class=&quot;form-control&quot; id=&quot;pol&quot; type=&quot;text&quot; value=&quot;Shanghai&quot; placeholder=&quot;예: Shanghai, China / Singapore&quot;&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;port&quot;&gt;POD (도착 항만)
         &lt;select class=&quot;form-select&quot; id=&quot;port&quot;&gt;&lt;option value=&quot;0&quot;&gt;부산신항&lt;/option&gt;&lt;option value=&quot;1&quot;&gt;부산북항&lt;/option&gt;&lt;option value=&quot;2&quot;&gt;인천신항&lt;/option&gt;&lt;option value=&quot;3&quot;&gt;인천항&lt;/option&gt;&lt;option value=&quot;4&quot;&gt;인천국제여객터미널&lt;/option&gt;&lt;option value=&quot;5&quot;&gt;광양항&lt;/option&gt;&lt;option value=&quot;6&quot;&gt;평택항&lt;/option&gt;&lt;option value=&quot;7&quot;&gt;울산신항&lt;/option&gt;&lt;option value=&quot;8&quot;&gt;울산항&lt;/option&gt;&lt;option value=&quot;9&quot;&gt;포항항&lt;/option&gt;&lt;option value=&quot;10&quot;&gt;군산항&lt;/option&gt;&lt;option value=&quot;11&quot;&gt;마산항&lt;/option&gt;&lt;option value=&quot;12&quot;&gt;대산항&lt;/option&gt;&lt;option value=&quot;13&quot;&gt;의왕ICD&lt;/option&gt;&lt;/select&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;finalDestination&quot;&gt;최종 도착지 주소
-        &lt;input class=&quot;form-control&quot; id=&quot;finalDestination&quot; type=&quot;text&quot; placeholder=&quot;예: 서울특별시 종로구 청운효자동&quot; aria-describedby=&quot;safeRateHelp&quot;&gt;
+        &lt;input class=&quot;form-control&quot; id=&quot;finalDestination&quot; type=&quot;text&quot; value=&quot;충청남도 아산시 탕정면&quot; placeholder=&quot;예: 서울특별시 종로구 청운효자동&quot; aria-describedby=&quot;safeRateHelp&quot;&gt;
       &lt;/label&gt;
       &lt;span class=&quot;text-small text-muted&quot;&gt;입력한 해외 POL을 기준으로 사용 가능한 파트너를 추천합니다.&lt;/span&gt;
       &lt;button class=&quot;btn&quot; id=&quot;safeRateLookup&quot; type=&quot;button&quot;&gt;안전운임제 DB 조회&lt;/button&gt;
@@ -953,7 +953,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;button class=&quot;btn btn-primary&quot; id=&quot;pdfPreview&quot; type=&quot;button&quot;&gt;A4 PDF 미리보기&lt;/button&gt;
     &lt;/div&gt;
     &lt;div class=&quot;dash-split&quot;&gt;
-      &lt;div class=&quot;card viz-stat&quot;&gt;&lt;div class=&quot;text-muted&quot;&gt;견적 합계 (통화별)&lt;/div&gt;&lt;div class=&quot;viz-stat-value&quot; id=&quot;total&quot;&gt;운송료 조회 필요&lt;/div&gt;&lt;div class=&quot;text-small text-muted&quot; id=&quot;totalNote&quot;&gt;환율 미적용 · USD/KRW를 분리 표기&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;card viz-stat&quot;&gt;&lt;div class=&quot;text-muted&quot;&gt;견적 합계 (통화별)&lt;/div&gt;&lt;div class=&quot;viz-stat-value&quot; id=&quot;total&quot;&gt;운송료 조회 필요&lt;/div&gt;&lt;div class=&quot;text-small text-muted&quot; id=&quot;totalNote&quot;&gt;가상 기본값: Shanghai → 부산신항 → 충남 아산시 탕정면&lt;/div&gt;&lt;/div&gt;
       &lt;div class=&quot;dash-summary&quot; aria-label=&quot;견적 요약&quot;&gt;
         &lt;div class=&quot;card viz-stat&quot;&gt;&lt;div class=&quot;text-muted&quot;&gt;도착지 비용 합계 (KRW)&lt;/div&gt;&lt;div class=&quot;viz-stat-value&quot; id=&quot;logistics&quot;&gt;—&lt;/div&gt;&lt;/div&gt;
         &lt;div class=&quot;card viz-stat&quot;&gt;&lt;div class=&quot;text-muted&quot;&gt;해상·EXW 합계 (USD)&lt;/div&gt;&lt;div class=&quot;viz-stat-value&quot; id=&quot;originUsd&quot;&gt;—&lt;/div&gt;&lt;/div&gt;
@@ -1027,7 +1027,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         } catch (error) {
           safeRateMessage = &#x27;안전운임제 DB를 읽을 수 없습니다&#x27;;
         }
-        render();
+        if (safeDb &amp;&amp; finalDestination.value.trim()) lookupSafeRate(); else render();
       }
       function recommendPartners() {
         const query = normalize(pol.value).toLowerCase();
@@ -1101,7 +1101,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           return line;
         }));
       }
-      safeRateLookup.addEventListener(&#x27;click&#x27;, () =&gt; {
+      function lookupSafeRate() {
         const query = normalize(finalDestination.value);
         if (!query) {
           safeRateMessage = &#x27;최종 도착지 주소 입력 필요&#x27;;
@@ -1119,7 +1119,8 @@ html&gt;body{padding:0}&lt;/style&gt;
           }
         }
         render();
-      });
+      }
+      safeRateLookup.addEventListener(&#x27;click&#x27;, lookupSafeRate);
       finalDestination.addEventListener(&#x27;input&#x27;, () =&gt; { safeRate = null; safeRateMessage = finalDestination.value.trim() ? &#x27;안전운임제 DB 조회 대기&#x27; : &#x27;주소 입력 후 안전운임제 DB 조회&#x27;; render(); });
       originAddress.addEventListener(&#x27;input&#x27;, render);
       [incoterm, pol, mode, port, equipment, quantity, additionalCostName, additionalCost].forEach(input =&gt; [&#x27;input&#x27;, &#x27;change&#x27;].forEach(event =&gt; input.addEventListener(event, () =&gt; { if (input === mode || input === port || input === equipment) safeRate = null; render(); })));
