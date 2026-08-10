@@ -992,7 +992,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;div class=&quot;viz-row&quot;&gt;&lt;h2 id=&quot;partner-manage-title&quot;&gt;해외 파트너 관리&lt;/h2&gt;&lt;span class=&quot;viz-badge&quot; id=&quot;partnerManageCount&quot;&gt;0곳&lt;/span&gt;&lt;/div&gt;
     &lt;div class=&quot;viz-controls&quot; aria-label=&quot;파트너 검색 및 입력&quot;&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;partnerSearch&quot;&gt;파트너 검색
-        &lt;input class=&quot;form-control&quot; id=&quot;partnerSearch&quot; type=&quot;search&quot; placeholder=&quot;회사명, 국가, 도시&quot;&gt;
+        &lt;input class=&quot;form-control&quot; id=&quot;partnerSearch&quot; type=&quot;search&quot; placeholder=&quot;도시 / 선적항&quot;&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;partnerCompany&quot;&gt;회사명
         &lt;input class=&quot;form-control&quot; id=&quot;partnerCompany&quot; type=&quot;text&quot; required&gt;
@@ -1013,7 +1013,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;div id=&quot;partnerManageStatus&quot; class=&quot;text-small text-muted&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
     &lt;div class=&quot;table-responsive&quot;&gt;
       &lt;table class=&quot;table table-sm&quot;&gt;
-        &lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;회사명&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;국가&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;도시 / 선적항&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;계약&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;관리&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+        &lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;도시 / 선적항&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;관리&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
         &lt;tbody id=&quot;partnerManageRows&quot;&gt;&lt;/tbody&gt;
       &lt;/table&gt;
     &lt;/div&gt;
@@ -1138,13 +1138,13 @@ html&gt;body{padding:0}&lt;/style&gt;
       }
       function renderPartnerManagement() {
         const query = normalize(partnerSearch.value).toLowerCase();
-        const filtered = managedPartners.filter(record =&gt; !query || [record.name, record.country, record.city, record.contract].some(value =&gt; normalize(value).toLowerCase().includes(query)));
+        const filtered = managedPartners.filter(record =&gt; !query || normalize(record.city).toLowerCase().includes(query));
         const visible = filtered.slice(0, 50);
         root.querySelector(&#x27;#partnerManageCount&#x27;).textContent = `${managedPartners.length}곳`;
         partnerManageStatus.textContent = filtered.length &gt; visible.length ? `검색 결과 ${filtered.length}곳 중 50곳을 표시합니다.` : `검색 결과 ${filtered.length}곳`;
         partnerManageRows.replaceChildren(...visible.map(record =&gt; {
           const row = document.createElement(&#x27;tr&#x27;);
-          [record.name, record.country, record.city, record.contract || &#x27;—&#x27;].forEach(value =&gt; {
+          [record.city].forEach(value =&gt; {
             const cell = document.createElement(&#x27;td&#x27;);
             cell.textContent = value;
             row.append(cell);
