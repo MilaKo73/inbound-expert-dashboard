@@ -1035,6 +1035,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       const additionalCostName = root.querySelector(&#x27;#additionalCostName&#x27;);
       const additionalCost = root.querySelector(&#x27;#additionalCost&#x27;);
       const FOREIGN_CURRENCY = &#x27;USD&#x27;;
+      const COMMON_CURRENCIES = [&#x27;USD&#x27;, &#x27;EUR&#x27;, &#x27;CNY&#x27;, &#x27;JPY&#x27;, &#x27;GBP&#x27;, &#x27;SGD&#x27;, &#x27;HKD&#x27;, &#x27;AUD&#x27;, &#x27;CAD&#x27;, &#x27;CHF&#x27;, &#x27;AED&#x27;, &#x27;THB&#x27;, &#x27;VND&#x27;];
       const quoteSeaFreight = root.querySelector(&#x27;#quoteSeaFreight&#x27;);
       const quoteExwAmount = root.querySelector(&#x27;#quoteExwAmount&#x27;);
       const quoteDestinationKrw = root.querySelector(&#x27;#quoteDestinationKrw&#x27;);
@@ -1075,6 +1076,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       };
       let safeDb = null;
       let safeRate = null;
+      let destinationChargeCurrency = &#x27;USD&#x27;;
       let safeRateMessage = &#x27;안전운임제 DB 로드 중&#x27;;
       const normalize = value =&gt; String(value || &#x27;&#x27;).replace(/[\s,]/g, &#x27;&#x27;);
       const format = (value, currency) =&gt; new Intl.NumberFormat(&#x27;ko-KR&#x27;, { maximumFractionDigits: 0 }).format(value) + &#x27; &#x27; + currency;
@@ -1202,6 +1204,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       function selectedCosts() {
         const selected = costs[mode.value].map(item =&gt; {
           if (item[0] === &#x27;내륙운송&#x27; &amp;&amp; mode.value === &#x27;FCL&#x27;) return [item[0], item[1], safeRate ? safeRate.amount : null, &#x27;KRW&#x27;];
+          if (item[0] === &#x27;도착지 부대비용&#x27;) return [item[0], item[1], item[2], destinationChargeCurrency, item[4]];
           return item;
         });
         if (incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;) selected.splice(1, 0, [&#x27;EXW 비용&#x27;, &#x27;별도 확인&#x27;, null, FOREIGN_CURRENCY, true, &#x27;별도 확인&#x27;]);
@@ -1272,12 +1275,35 @@ html&gt;body{padding:0}&lt;/style&gt;
         rows.replaceChildren(...selected.map(item =&gt; {
           const amount = Number.isFinite(item[2]) ? lineAmount(item) : null;
           const row = document.createElement(&#x27;tr&#x27;);
-          [item[0], item[1], item[3], amount === null ? (item[5] || &#x27;RATE_REQUIRED&#x27;) : format(amount, item[3])].forEach((value, index) =&gt; {
+          [item[0], item[1]].forEach(value =&gt; {
             const cell = document.createElement(&#x27;td&#x27;);
-            if (index === 3) cell.className = &#x27;text-end&#x27;;
             cell.textContent = value;
             row.append(cell);
           });
+          const currencyCell = document.createElement(&#x27;td&#x27;);
+          if (item[0] === &#x27;도착지 부대비용&#x27;) {
+            const currencySelect = document.createElement(&#x27;select&#x27;);
+            currencySelect.className = &#x27;form-select&#x27;;
+            currencySelect.setAttribute(&#x27;aria-label&#x27;, &#x27;도착지 부대비용 통화&#x27;);
+            COMMON_CURRENCIES.forEach(currency =&gt; {
+              const option = document.createElement(&#x27;option&#x27;);
+              option.value = currency;
+              option.textContent = currency;
+              option.selected = currency === destinationChargeCurrency;
+              currencySelect.append(option);
+            });
+            currencySelect.addEventListener(&#x27;change&#x27;, () =&gt; {
+              destinationChargeCurrency = currencySelect.value;
+              render();
+            });
+            currencyCell.append(currencySelect);
+          } else {
+            currencyCell.textContent = item[3];
+          }
+          const amountCell = document.createElement(&#x27;td&#x27;);
+          amountCell.className = &#x27;text-end&#x27;;
+          amountCell.textContent = amount === null ? (item[5] || &#x27;RATE_REQUIRED&#x27;) : format(amount, item[3]);
+          row.append(currencyCell, amountCell);
           return row;
         }));
       }
