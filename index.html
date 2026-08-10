@@ -1348,10 +1348,39 @@ html&gt;body{padding:0}&lt;/style&gt;
       [quoteSeaFreight, quoteExwAmount, quoteDestinationKrw].forEach(input =&gt; input.addEventListener(&#x27;input&#x27;, renderCustomerQuoteTotal));
       partnerRecommend.addEventListener(&#x27;click&#x27;, recommendPartners);
       pdfPreview.addEventListener(&#x27;click&#x27;, () =&gt; {
-        const previousTitle = document.title;
-        document.title = &#x27;해상 수입 고객 견적서&#x27;;
-        window.addEventListener(&#x27;afterprint&#x27;, () =&gt; { document.title = previousTitle; }, { once: true });
-        window.print();
+        const previewWindow = window.open(&#x27;&#x27;, &#x27;inboundQuotePreview&#x27;, &#x27;width=900,height=900,resizable=yes,scrollbars=yes&#x27;);
+        if (!previewWindow) {
+          window.alert(&#x27;견적서 미리보기를 열 수 없습니다. 브라우저의 팝업 차단을 허용해 주세요.&#x27;);
+          return;
+        }
+        const previewClone = root.querySelector(&#x27;#quotePreview&#x27;).cloneNode(true);
+        const sourceInputs = root.querySelectorAll(&#x27;#quotePreview input&#x27;);
+        previewClone.querySelectorAll(&#x27;input&#x27;).forEach((input, index) =&gt; {
+          input.value = sourceInputs[index].value;
+          input.setAttribute(&#x27;value&#x27;, sourceInputs[index].value);
+          input.readOnly = true;
+        });
+        previewWindow.document.open();
+        previewWindow.document.write(`&lt;!doctype html&gt;&lt;html lang=&quot;ko&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;해상 수입 고객 견적서 미리보기&lt;/title&gt;&lt;style&gt;
+          @page { size:A4 portrait; margin:12mm; }
+          * { box-sizing:border-box; }
+          body { margin:0; padding:24px; background:#e8edf5; color:#111827; font-family:Arial, &quot;Noto Sans KR&quot;, sans-serif; }
+          .toolbar { max-width:210mm; margin:0 auto 16px; display:flex; justify-content:flex-end; gap:8px; }
+          button { padding:10px 16px; border:1px solid #2563eb; border-radius:6px; background:#2563eb; color:#fff; cursor:pointer; }
+          .sheet { width:210mm; min-height:297mm; margin:0 auto; padding:16mm; background:#fff; box-shadow:0 8px 24px rgba(15,23,42,.18); }
+          h2 { margin:0 0 20px; color:#1d4ed8; font-size:24px; }
+          h3 { display:none; }
+          table { width:100%; border-collapse:collapse; }
+          th, td { padding:11px 8px; border-bottom:1px solid #dbe3ee; text-align:left; vertical-align:middle; }
+          th { width:34%; color:#334155; font-weight:600; }
+          input { width:70%; padding:8px; border:1px solid #cbd5e1; border-radius:4px; color:#111827; background:#fff; }
+          .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+          [hidden] { display:none !important; }
+          @media print { body { padding:0; background:#fff; } .toolbar { display:none; } .sheet { width:auto; min-height:auto; padding:0; box-shadow:none; } }
+        &lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;div class=&quot;toolbar&quot;&gt;&lt;button id=&quot;popupPrint&quot; type=&quot;button&quot;&gt;PDF 저장·출력&lt;/button&gt;&lt;/div&gt;&lt;main class=&quot;sheet&quot;&gt;${previewClone.innerHTML}&lt;/main&gt;&lt;/body&gt;&lt;/html&gt;`);
+        previewWindow.document.close();
+        previewWindow.document.getElementById(&#x27;popupPrint&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; previewWindow.print());
+        previewWindow.focus();
       });
       pol.addEventListener(&#x27;input&#x27;, () =&gt; { partnerList.replaceChildren(); partnerStatus.textContent = pol.value.trim() ? &#x27;POL 입력 완료 · 파트너 2곳 추천 버튼을 눌러 확인하세요.&#x27; : &#x27;해외 POL 또는 국가·도시를 입력해 주세요.&#x27;; });
       quoteMenu.addEventListener(&#x27;click&#x27;, () =&gt; showMenu(&#x27;quote&#x27;));
