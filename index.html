@@ -927,7 +927,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;equipment&quot;&gt;컨테이너
         &lt;select class=&quot;form-select&quot; id=&quot;equipment&quot;&gt;&lt;option value=&quot;40&quot;&gt;40FT&lt;/option&gt;&lt;option value=&quot;20&quot;&gt;20FT&lt;/option&gt;&lt;/select&gt;
       &lt;/label&gt;
-      &lt;label class=&quot;form-label&quot; for=&quot;quantity&quot;&gt;&lt;span id=&quot;basisLabel&quot;&gt;컨테이너 수&lt;/span&gt;
+      &lt;label class=&quot;form-label&quot; for=&quot;quantity&quot;&gt;&lt;span id=&quot;basisLabel&quot;&gt;No of pkg&lt;/span&gt;
         &lt;input class=&quot;form-control&quot; id=&quot;quantity&quot; type=&quot;number&quot; min=&quot;1&quot; step=&quot;1&quot; value=&quot;1&quot;&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;pol&quot;&gt;POL (해외 선적항 / 국가·도시)
@@ -975,7 +975,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;POL / POD&lt;/th&gt;&lt;td&gt;&lt;span id=&quot;previewPol&quot;&gt;미선택&lt;/span&gt; / &lt;span id=&quot;previewPod&quot;&gt;부산신항&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;운송 방식&lt;/th&gt;&lt;td id=&quot;previewMode&quot;&gt;FCL&lt;/td&gt;&lt;/tr&gt;
           &lt;tr id=&quot;previewOriginRow&quot; hidden&gt;&lt;th scope=&quot;row&quot;&gt;출고지 주소&lt;/th&gt;&lt;td id=&quot;previewOrigin&quot;&gt;입력 필요&lt;/td&gt;&lt;/tr&gt;
-          &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;계산 기준&lt;/th&gt;&lt;td id=&quot;previewBasis&quot;&gt;컨테이너 × 1&lt;/td&gt;&lt;/tr&gt;
+          &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;계산 기준&lt;/th&gt;&lt;td id=&quot;previewBasis&quot;&gt;40FT · No of pkg × 1&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;해상운임 합계&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteSeaFreight&quot;&gt;해상운임 합계 외화 금액&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteSeaFreight&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;금액 입력&quot;&gt; &lt;span class=&quot;text-small text-muted&quot; id=&quot;quoteForeignCurrency&quot;&gt;USD&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
           &lt;tr id=&quot;quoteExwRow&quot; hidden&gt;&lt;th scope=&quot;row&quot;&gt;EXW 비용&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteExwAmount&quot;&gt;EXW 비용 외화 금액&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteExwAmount&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;별도 확인&quot;&gt; &lt;span class=&quot;text-small text-muted&quot;&gt;USD&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;도착지 비용 합계&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteDestinationKrw&quot;&gt;도착지 비용 합계 KRW&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteDestinationKrw&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;1&quot; inputmode=&quot;numeric&quot; placeholder=&quot;금액 입력&quot;&gt; &lt;span class=&quot;text-small text-muted&quot;&gt;KRW&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
@@ -1069,7 +1069,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       }
       const costs = {
         FCL: [[&#x27;해상 운임&#x27;, &#x27;컨테이너&#x27;, 850, &#x27;USD&#x27;], [&#x27;도착지 부대비용&#x27;, &#x27;도착지 확인&#x27;, null, &#x27;USD&#x27;], [&#x27;도착지 THC외&#x27;, &#x27;컨테이너&#x27;, 360000, &#x27;KRW&#x27;], [&#x27;내륙운송&#x27;, &#x27;안전운임제 DB&#x27;, null, &#x27;KRW&#x27;], [&#x27;통관 수수료&#x27;, &#x27;신고 건&#x27;, 180000, &#x27;KRW&#x27;], [&#x27;항만 보안·서류비&#x27;, &#x27;신고 건&#x27;, 55000, &#x27;KRW&#x27;]],
-        LCL: [[&#x27;LCL 해상 운임&#x27;, &#x27;CBM/W·M&#x27;, 180, &#x27;USD&#x27;], [&#x27;도착지 부대비용&#x27;, &#x27;도착지 확인&#x27;, null, &#x27;USD&#x27;], [&#x27;CFS 반출·취급&#x27;, &#x27;CBM/W·M&#x27;, 95000, &#x27;KRW&#x27;], [&#x27;내륙운송&#x27;, &#x27;차량·CBM&#x27;, 160000, &#x27;KRW&#x27;], [&#x27;통관 수수료&#x27;, &#x27;신고 건&#x27;, 180000, &#x27;KRW&#x27;], [&#x27;항만 보안·서류비&#x27;, &#x27;신고 건&#x27;, 55000, &#x27;KRW&#x27;]]
+        LCL: [[&#x27;LCL 해상 운임&#x27;, &#x27;최종 CBM&#x27;, 180, &#x27;USD&#x27;], [&#x27;도착지 부대비용&#x27;, &#x27;도착지 확인&#x27;, null, &#x27;USD&#x27;], [&#x27;CFS 반출·취급&#x27;, &#x27;최종 CBM&#x27;, 95000, &#x27;KRW&#x27;], [&#x27;내륙운송&#x27;, &#x27;차량·CBM&#x27;, 160000, &#x27;KRW&#x27;], [&#x27;통관 수수료&#x27;, &#x27;신고 건&#x27;, 180000, &#x27;KRW&#x27;], [&#x27;항만 보안·서류비&#x27;, &#x27;신고 건&#x27;, 55000, &#x27;KRW&#x27;]]
       };
       let safeDb = null;
       let safeRate = null;
@@ -1236,12 +1236,12 @@ html&gt;body{padding:0}&lt;/style&gt;
         const seaFreightDisplay = hasMissingSea ? `${format(seaFreightTotal, FOREIGN_CURRENCY)} + 미확정 비용` : format(seaFreightTotal, FOREIGN_CURRENCY);
         const exwDisplay = requiresOrigin ? &#x27;별도 확인&#x27; : &#x27;해당 없음&#x27;;
         const krwDisplay = hasMissingKrw ? `${format(krwTotal, &#x27;KRW&#x27;)} + 미확정 비용` : format(krwTotal, &#x27;KRW&#x27;);
-        root.querySelector(&#x27;#basisLabel&#x27;).textContent = isFcl ? &#x27;컨테이너 수&#x27; : &#x27;CBM/W·M 수량&#x27;;
+        root.querySelector(&#x27;#basisLabel&#x27;).textContent = isFcl ? &#x27;No of pkg&#x27; : &#x27;최종 CBM&#x27;;
         root.querySelector(&#x27;#previewIncoterm&#x27;).textContent = incoterm.value + &#x27; 2020&#x27;;
         root.querySelector(&#x27;#previewPol&#x27;).textContent = pol.value || &#x27;미선택&#x27;;
         root.querySelector(&#x27;#previewPod&#x27;).textContent = port.options[port.selectedIndex].text;
         root.querySelector(&#x27;#previewMode&#x27;).textContent = mode.value;
-        root.querySelector(&#x27;#previewBasis&#x27;).textContent = (isFcl ? equipment.value + &#x27;FT 컨테이너 × &#x27; : &#x27;W·M/CBM × &#x27;) + q;
+        root.querySelector(&#x27;#previewBasis&#x27;).textContent = isFcl ? `${equipment.value}FT · No of pkg × ${q}` : `최종 ${q} CBM`;
         const extra = Math.max(0, Number(additionalCost.value) || 0);
         root.querySelector(&#x27;#previewAdditional&#x27;).textContent = extra ? `${additionalCostName.value.trim() || &#x27;기타 추가 비용&#x27;} · ${format(extra, &#x27;KRW&#x27;)}` : &#x27;없음&#x27;;
         root.querySelector(&#x27;#previewOriginRow&#x27;).hidden = !requiresOrigin;
