@@ -905,6 +905,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       #fcl-lcl-dashboard #quoteView &gt; .dash-layout &gt; #quotePreview { display:block !important; }
       #fcl-lcl-dashboard .print-only { display:block; }
       #fcl-lcl-dashboard #quote-title { display:none; }
+      #fcl-lcl-dashboard .no-print { display:none !important; }
     }
     @media (max-width: 560px) { #fcl-lcl-dashboard .dash-split { grid-template-columns:1fr; } }
   &lt;/style&gt;
@@ -944,7 +945,6 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;button class=&quot;btn&quot; id=&quot;safeRateLookup&quot; type=&quot;button&quot;&gt;안전운임제 DB 조회&lt;/button&gt;
       &lt;span class=&quot;text-small text-muted&quot; id=&quot;safeRateHelp&quot;&gt;FCL 전용 · 시도·시군구·행정동까지 입력&lt;/span&gt;
       &lt;button class=&quot;btn&quot; id=&quot;partnerRecommend&quot; type=&quot;button&quot;&gt;파트너 2곳 추천&lt;/button&gt;
-      &lt;button class=&quot;btn btn-primary&quot; id=&quot;pdfPreview&quot; type=&quot;button&quot;&gt;고객 견적 PDF 저장·출력&lt;/button&gt;
     &lt;/div&gt;
     &lt;div class=&quot;dash-split&quot;&gt;
       &lt;div class=&quot;card viz-stat&quot;&gt;&lt;div class=&quot;text-muted&quot;&gt;견적 합계 (통화별)&lt;/div&gt;&lt;div class=&quot;viz-stat-value&quot; id=&quot;total&quot;&gt;운송료 조회 필요&lt;/div&gt;&lt;div class=&quot;text-small text-muted&quot; id=&quot;totalNote&quot;&gt;가상 기본값: Shanghai → 부산신항 → 충남 아산시 탕정면&lt;/div&gt;&lt;/div&gt;
@@ -963,7 +963,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;/section&gt;
       &lt;section class=&quot;card&quot; id=&quot;quotePreview&quot; aria-labelledby=&quot;quote-title&quot;&gt;
         &lt;h2 class=&quot;print-only&quot;&gt;해상 수입 견적서&lt;/h2&gt;
-        &lt;h3 id=&quot;quote-title&quot;&gt;고객 견적서 미리보기&lt;/h3&gt;
+        &lt;div class=&quot;viz-row&quot;&gt;&lt;h3 id=&quot;quote-title&quot;&gt;고객 견적서 미리보기&lt;/h3&gt;&lt;button class=&quot;btn btn-primary no-print&quot; id=&quot;pdfPreview&quot; type=&quot;button&quot;&gt;고객 견적 PDF 저장·출력&lt;/button&gt;&lt;/div&gt;
         &lt;table class=&quot;table table-sm&quot;&gt;&lt;tbody&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;고객사&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteCustomerName&quot;&gt;고객사명&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteCustomerName&quot; type=&quot;text&quot; placeholder=&quot;고객사명 입력&quot;&gt;&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;Incoterms&lt;/th&gt;&lt;td id=&quot;previewIncoterm&quot;&gt;FOB 2020&lt;/td&gt;&lt;/tr&gt;
@@ -1405,6 +1405,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           return;
         }
         const previewClone = root.querySelector(&#x27;#quotePreview&#x27;).cloneNode(true);
+        previewClone.querySelectorAll(&#x27;.no-print&#x27;).forEach(element =&gt; element.remove());
         const sourceInputs = root.querySelectorAll(&#x27;#quotePreview input&#x27;);
         previewClone.querySelectorAll(&#x27;input&#x27;).forEach((input, index) =&gt; {
           input.value = sourceInputs[index].value;
