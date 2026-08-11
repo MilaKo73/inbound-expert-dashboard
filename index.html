@@ -1031,6 +1031,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;button class=&quot;btn&quot; id=&quot;partnerResetDb&quot; type=&quot;button&quot;&gt;기본 DB 복원&lt;/button&gt;
     &lt;/div&gt;
     &lt;div id=&quot;partnerManageStatus&quot; class=&quot;text-small text-muted&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;text-small text-muted&quot;&gt;@partner-directory.example 주소는 화면 테스트용 샘플이며 실제 발송 주소가 아닙니다.&lt;/div&gt;
     &lt;div class=&quot;table-responsive&quot;&gt;
       &lt;table class=&quot;table table-sm&quot;&gt;
         &lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;파트너 명&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;대륙&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;도시 / 선적항&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;이메일 주소&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;관리&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
@@ -1108,7 +1109,8 @@ html&gt;body{padding:0}&lt;/style&gt;
         [&#x27;IMP-20260802-001&#x27;,&#x27;2026-08-02T08:25:00.000Z&#x27;,&#x27;테스트메디컬 I&#x27;,&#x27;Los Angeles&#x27;,&#x27;부산신항&#x27;,&#x27;FCL&#x27;,&#x27;CIF 2020&#x27;,&#x27;20FT × 1&#x27;,&#x27;대전광역시 유성구&#x27;,&#x27;2350&#x27;,&#x27;&#x27;,&#x27;&#x27;,&#x27;&#x27;, &#x27;720000&#x27;,&#x27;1,950,000 KRW&#x27;,&#x27;정밀검사비 · 250,000 KRW&#x27;,&#x27;2,350 USD + 2,920,000 KRW&#x27;],
         [&#x27;IMP-20260801-001&#x27;,&#x27;2026-08-01T00:40:00.000Z&#x27;,&#x27;가상소재 J&#x27;,&#x27;Kaohsiung&#x27;,&#x27;인천항&#x27;,&#x27;LCL&#x27;,&#x27;FOB 2020&#x27;,&#x27;No of pkg 18 · 최종 6 CBM&#x27;,&#x27;인천광역시 남동구&#x27;,&#x27;&#x27;,&#x27;&#x27;,&#x27;510&#x27;,&#x27;&#x27;,&#x27;470000&#x27;,&#x27;운송료 별도 확인&#x27;,&#x27;CFS 창고료 · 실비&#x27;,&#x27;510 USD + 470,000 KRW&#x27;]
       ].map(([refNo,createdAt,customer,pol,pod,mode,incoterm,basis,destination,seaFreight20,seaFreight40,seaFreightLcl,exwAmount,destinationKrw,inland,additional,total]) =&gt; ({ refNo, createdAt, customer, pol, pod, mode, incoterm, basis, destination, seaFreight20, seaFreight40, seaFreightLcl, exwAmount, exwCurrency: &#x27;USD&#x27;, destinationKrw, inland, additional, total, origin: incoterm.startsWith(&#x27;EXW&#x27;) || incoterm.startsWith(&#x27;FCA&#x27;) ? &#x27;가상 해외 출고지 주소&#x27; : &#x27;&#x27;, status: &#x27;SAMPLE · INDICATIVE&#x27; }));
-      const defaultPartners = () =&gt; PARTNER_DB.map((record, index) =&gt; ({ id: `base-${index}`, name: record[0], country: record[1], city: record[2], email: &#x27;&#x27;, contract: record[4] &amp;&amp; record[4] !== &#x27;nan&#x27; ? record[4] : &#x27;&#x27;, active: Number(record[5]) || 0 }));
+      const samplePartnerEmail = index =&gt; `partner${String(index + 1).padStart(3, &#x27;0&#x27;)}@partner-directory.example`;
+      const defaultPartners = () =&gt; PARTNER_DB.map((record, index) =&gt; ({ id: `base-${index}`, name: record[0], country: record[1], city: record[2], email: samplePartnerEmail(index), contract: record[4] &amp;&amp; record[4] !== &#x27;nan&#x27; ? record[4] : &#x27;&#x27;, active: Number(record[5]) || 0 }));
       let managedPartners;
       let quoteRecords = [];
       let editingPartnerId = null;
@@ -1117,6 +1119,12 @@ html&gt;body{padding:0}&lt;/style&gt;
         managedPartners = Array.isArray(savedPartners) ? savedPartners : defaultPartners();
       } catch (error) {
         managedPartners = defaultPartners();
+      }
+      managedPartners = managedPartners.map((record, index) =&gt; ({ ...record, email: record.email || samplePartnerEmail(index) }));
+      try {
+        localStorage.setItem(PARTNER_STORAGE_KEY, JSON.stringify(managedPartners));
+      } catch (error) {
+        // 저장 공간을 사용할 수 없는 경우에도 현재 화면에는 샘플 이메일을 표시한다.
       }
       try {
         const savedQuotes = JSON.parse(localStorage.getItem(QUOTE_STORAGE_KEY) || &#x27;[]&#x27;);
