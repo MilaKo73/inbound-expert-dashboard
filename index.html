@@ -955,7 +955,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;dash-layout&quot;&gt;
-      &lt;section aria-labelledby=&quot;breakdown-title&quot;&gt;&lt;h3 id=&quot;breakdown-title&quot;&gt;해상 수입 비용 내역&lt;/h3&gt;&lt;div class=&quot;table-responsive&quot;&gt;&lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;비용 항목&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;계산 기준&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;통화&lt;/th&gt;&lt;th scope=&quot;col&quot; class=&quot;text-end&quot;&gt;금액&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;costRows&quot; aria-live=&quot;polite&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/section&gt;
+      &lt;section aria-labelledby=&quot;breakdown-title&quot;&gt;&lt;h3 id=&quot;breakdown-title&quot;&gt;해상 수입 비용 내역&lt;/h3&gt;&lt;div class=&quot;table-responsive&quot;&gt;&lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;비용 항목&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;계산 기준&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;통화&lt;/th&gt;&lt;th scope=&quot;col&quot; class=&quot;text-end&quot;&gt;금액&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;costRows&quot; aria-live=&quot;polite&quot;&gt;&lt;/tbody&gt;&lt;tfoot id=&quot;costCurrencyTotals&quot; aria-live=&quot;polite&quot;&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/section&gt;
       &lt;section class=&quot;card&quot; aria-labelledby=&quot;partner-title&quot;&gt;
         &lt;h3 id=&quot;partner-title&quot;&gt;해외 파트너 추천&lt;/h3&gt;
         &lt;div id=&quot;partnerStatus&quot; class=&quot;text-small text-muted&quot;&gt;해외 POL 또는 국가·도시를 입력해 주세요.&lt;/div&gt;
@@ -1038,6 +1038,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       const partnerStatus = root.querySelector(&#x27;#partnerStatus&#x27;);
       const partnerList = root.querySelector(&#x27;#partnerList&#x27;);
       const rows = root.querySelector(&#x27;#costRows&#x27;);
+      const costCurrencyTotals = root.querySelector(&#x27;#costCurrencyTotals&#x27;);
       const quoteMenu = root.querySelector(&#x27;#quoteMenu&#x27;);
       const partnerManageMenu = root.querySelector(&#x27;#partnerManageMenu&#x27;);
       const quoteView = root.querySelector(&#x27;#quoteView&#x27;);
@@ -1264,6 +1265,37 @@ html&gt;body{padding:0}&lt;/style&gt;
         row.append(itemCell, detailCell, currencyCell, amountCell);
         return row;
       }
+      function renderCostCurrencyTotals(selected, lineAmount) {
+        const totals = new Map();
+        const pending = new Set();
+        selected.forEach(item =&gt; {
+          const currency = item[3];
+          if (Number.isFinite(item[2])) {
+            totals.set(currency, (totals.get(currency) || 0) + lineAmount(item));
+          } else {
+            pending.add(currency);
+          }
+        });
+        const currencies = [...new Set([...totals.keys(), ...pending])];
+        costCurrencyTotals.replaceChildren(...currencies.map((currency, index) =&gt; {
+          const row = document.createElement(&#x27;tr&#x27;);
+          const labelCell = document.createElement(&#x27;th&#x27;);
+          labelCell.scope = &#x27;row&#x27;;
+          labelCell.colSpan = 2;
+          labelCell.textContent = index === 0 ? &#x27;통화별 합계&#x27; : &#x27;&#x27;;
+          const currencyCell = document.createElement(&#x27;th&#x27;);
+          currencyCell.scope = &#x27;row&#x27;;
+          currencyCell.textContent = currency;
+          const amountCell = document.createElement(&#x27;td&#x27;);
+          amountCell.className = &#x27;text-end&#x27;;
+          const total = totals.get(currency) || 0;
+          amountCell.textContent = pending.has(currency)
+            ? `${format(total, currency)} + 별도 확인 금액`
+            : format(total, currency);
+          row.append(labelCell, currencyCell, amountCell);
+          return row;
+        }));
+      }
       function renderCustomerQuoteTotal() {
         const seaFreight = quoteSeaFreight.value.trim() === &#x27;&#x27; ? null : Number(quoteSeaFreight.value);
         const requiresExwCost = incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;;
@@ -1372,6 +1404,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           row.append(currencyCell, amountCell);
           return row;
         }), createAdditionalCostRow());
+        renderCostCurrencyTotals(selected, lineAmount);
       }
       function lookupSafeRate() {
         const query = normalize(finalDestination.value);
