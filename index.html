@@ -891,6 +891,7 @@ html&gt;body{padding:0}&lt;/style&gt;
 &lt;div id=&quot;fcl-lcl-dashboard&quot; aria-label=&quot;FCL 및 LCL 수입 견적 대시보드&quot;&gt;
   &lt;style&gt;
     #fcl-lcl-dashboard .dash-layout { display:grid; gap:16px; }
+    #fcl-lcl-dashboard [hidden] { display:none !important; }
     #fcl-lcl-dashboard #quoteView[hidden], #fcl-lcl-dashboard #partnerManageView[hidden] { display:none !important; }
     #fcl-lcl-dashboard .dash-split { display:grid; grid-template-columns:minmax(220px, .8fr) minmax(0, 1.2fr); gap:20px; align-items:start; }
     #fcl-lcl-dashboard h2, #fcl-lcl-dashboard h3 { color:var(--blue); }
@@ -925,11 +926,16 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;mode&quot;&gt;운송 방식
         &lt;select class=&quot;form-select&quot; id=&quot;mode&quot;&gt;&lt;option value=&quot;FCL&quot;&gt;FCL&lt;/option&gt;&lt;option value=&quot;LCL&quot;&gt;LCL&lt;/option&gt;&lt;/select&gt;
       &lt;/label&gt;
-      &lt;label class=&quot;form-label&quot; for=&quot;equipment&quot;&gt;컨테이너 or No of pkg
-        &lt;select class=&quot;form-select&quot; id=&quot;equipment&quot; aria-label=&quot;컨테이너 사이즈&quot;&gt;&lt;option value=&quot;40&quot;&gt;40FT&lt;/option&gt;&lt;option value=&quot;20&quot;&gt;20FT&lt;/option&gt;&lt;/select&gt;
-        &lt;input class=&quot;form-control&quot; id=&quot;packageCount&quot; type=&quot;number&quot; min=&quot;1&quot; step=&quot;1&quot; value=&quot;1&quot; inputmode=&quot;numeric&quot; aria-label=&quot;No of pkg&quot; hidden disabled&gt;
+      &lt;div id=&quot;containerFields&quot;&gt;&lt;span class=&quot;form-label&quot;&gt;컨테이너 종류별 수량&lt;/span&gt;
+        &lt;div class=&quot;viz-row&quot;&gt;
+          &lt;label class=&quot;form-label&quot; for=&quot;quantity20&quot;&gt;20FT 수량&lt;input class=&quot;form-control&quot; id=&quot;quantity20&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;1&quot; value=&quot;0&quot; inputmode=&quot;numeric&quot;&gt;&lt;/label&gt;
+          &lt;label class=&quot;form-label&quot; for=&quot;quantity40&quot;&gt;40FT 수량&lt;input class=&quot;form-control&quot; id=&quot;quantity40&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;1&quot; value=&quot;1&quot; inputmode=&quot;numeric&quot;&gt;&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;label class=&quot;form-label&quot; id=&quot;packageField&quot; for=&quot;packageCount&quot; hidden&gt;컨테이너 or No of pkg
+        &lt;input class=&quot;form-control&quot; id=&quot;packageCount&quot; type=&quot;number&quot; min=&quot;1&quot; step=&quot;1&quot; value=&quot;1&quot; inputmode=&quot;numeric&quot; aria-label=&quot;No of pkg&quot; disabled&gt;
       &lt;/label&gt;
-      &lt;label class=&quot;form-label&quot; for=&quot;quantity&quot;&gt;&lt;span id=&quot;basisLabel&quot;&gt;컨테이너 수&lt;/span&gt;
+      &lt;label class=&quot;form-label&quot; id=&quot;quantityField&quot; for=&quot;quantity&quot; hidden&gt;&lt;span id=&quot;basisLabel&quot;&gt;최종 CBM&lt;/span&gt;
         &lt;input class=&quot;form-control&quot; id=&quot;quantity&quot; type=&quot;number&quot; min=&quot;1&quot; step=&quot;1&quot; value=&quot;1&quot;&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;pol&quot;&gt;POL (해외 선적항 / 국가·도시)
@@ -1023,8 +1029,12 @@ html&gt;body{padding:0}&lt;/style&gt;
       const port = root.querySelector(&#x27;#port&#x27;);
       const FCL_PORTS = Array.from(port.options).map(option =&gt; ({ value: option.value, label: option.textContent }));
       const LCL_PORTS = [{ value: &#x27;lcl-busan&#x27;, label: &#x27;부산항&#x27; }, { value: &#x27;lcl-incheon&#x27;, label: &#x27;인천항&#x27; }];
-      const equipment = root.querySelector(&#x27;#equipment&#x27;);
+      const containerFields = root.querySelector(&#x27;#containerFields&#x27;);
+      const quantity20 = root.querySelector(&#x27;#quantity20&#x27;);
+      const quantity40 = root.querySelector(&#x27;#quantity40&#x27;);
+      const packageField = root.querySelector(&#x27;#packageField&#x27;);
       const packageCount = root.querySelector(&#x27;#packageCount&#x27;);
+      const quantityField = root.querySelector(&#x27;#quantityField&#x27;);
       const finalDestination = root.querySelector(&#x27;#finalDestination&#x27;);
       const safeRateLookup = root.querySelector(&#x27;#safeRateLookup&#x27;);
       const quantity = root.querySelector(&#x27;#quantity&#x27;);
@@ -1069,7 +1079,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         LCL: [[&#x27;LCL 해상 운임&#x27;, &#x27;최종 CBM&#x27;, 180, &#x27;USD&#x27;], [&#x27;도착지 부대비용&#x27;, &#x27;도착지 확인&#x27;, null, &#x27;USD&#x27;], [&#x27;CFS 반출·취급&#x27;, &#x27;최종 CBM&#x27;, 95000, &#x27;KRW&#x27;], [&#x27;도착지 CFS 창고료&#x27;, &#x27;실비&#x27;, null, &#x27;KRW&#x27;, true, &#x27;실비&#x27;], [&#x27;내륙운송&#x27;, &#x27;별도 확인&#x27;, null, &#x27;KRW&#x27;, true, &#x27;별도 확인&#x27;], [&#x27;통관 수수료&#x27;, &#x27;신고 건&#x27;, 180000, &#x27;KRW&#x27;], [&#x27;항만 보안·서류비&#x27;, &#x27;신고 건&#x27;, 55000, &#x27;KRW&#x27;]]
       };
       let safeDb = null;
-      let safeRate = null;
+      let safeRates = { &#x27;20&#x27;: null, &#x27;40&#x27;: null };
       let exwCostCurrency = &#x27;USD&#x27;;
       let additionalCostNameValue = &#x27;&#x27;;
       let additionalCostValue = 0;
@@ -1214,10 +1224,22 @@ html&gt;body{padding:0}&lt;/style&gt;
         renderPartnerManagement();
       }
       function selectedCosts() {
-        const selected = costs[mode.value].map(item =&gt; {
-          if (item[0] === &#x27;내륙운송&#x27; &amp;&amp; mode.value === &#x27;FCL&#x27;) return [item[0], item[1], safeRate ? safeRate.amount : null, &#x27;KRW&#x27;];
-          return item;
-        });
+        let selected;
+        if (mode.value === &#x27;FCL&#x27;) {
+          const equipmentSelections = [
+            { size: &#x27;20&#x27;, quantity: Math.max(0, Math.floor(Number(quantity20.value) || 0)) },
+            { size: &#x27;40&#x27;, quantity: Math.max(0, Math.floor(Number(quantity40.value) || 0)) }
+          ].filter(item =&gt; item.quantity &gt; 0);
+          selected = equipmentSelections.flatMap(item =&gt; [
+            [&#x27;해상 운임&#x27;, `${item.size}FT × ${item.quantity}`, 850, &#x27;USD&#x27;, false, null, null, item.quantity],
+            [&#x27;도착지 부대비용&#x27;, `${item.size}FT × ${item.quantity} · 도착지 확인`, null, &#x27;USD&#x27;, false, null, null, item.quantity],
+            [&#x27;도착지 THC외&#x27;, `${item.size}FT × ${item.quantity}`, 360000, &#x27;KRW&#x27;, false, null, null, item.quantity],
+            [&#x27;내륙운송&#x27;, `안전운임제 DB · ${item.size}FT × ${item.quantity}`, safeRates[item.size] ? safeRates[item.size].amount : null, &#x27;KRW&#x27;, false, null, null, item.quantity]
+          ]);
+          selected.push([&#x27;통관 수수료&#x27;, &#x27;신고 건&#x27;, 180000, &#x27;KRW&#x27;, true], [&#x27;항만 보안·서류비&#x27;, &#x27;신고 건&#x27;, 55000, &#x27;KRW&#x27;, true]);
+        } else {
+          selected = costs.LCL.map(item =&gt; [...item]);
+        }
         if (incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;) selected.splice(1, 0, [&#x27;EXW 비용&#x27;, &#x27;별도 확인&#x27;, null, exwCostCurrency, true, &#x27;별도 확인&#x27;]);
         selected.push([&#x27;기타 추가 비용&#x27;, &#x27;세부 항목명 입력&#x27;, additionalCostValue, &#x27;KRW&#x27;, true, null, &#x27;additional&#x27;]);
         return selected;
@@ -1293,8 +1315,11 @@ html&gt;body{padding:0}&lt;/style&gt;
         const selected = selectedCosts();
         const q = Math.max(1, Number(quantity.value) || 1);
         const isFcl = mode.value === &#x27;FCL&#x27;;
+        const count20 = Math.max(0, Math.floor(Number(quantity20.value) || 0));
+        const count40 = Math.max(0, Math.floor(Number(quantity40.value) || 0));
+        const hasFclEquipment = count20 + count40 &gt; 0;
         const requiresOrigin = incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;;
-        const lineAmount = item =&gt; item[4] ? item[2] : item[2] * q;
+        const lineAmount = item =&gt; item[4] ? item[2] : item[2] * (Number.isFinite(item[7]) ? item[7] : q);
         const known = selected.filter(item =&gt; Number.isFinite(item[2]));
         const hasMissing = selected.some(item =&gt; !Number.isFinite(item[2]));
         const isExwCost = item =&gt; item[0].startsWith(&#x27;EXW&#x27;);
@@ -1307,13 +1332,14 @@ html&gt;body{padding:0}&lt;/style&gt;
         const seaFreightDisplay = hasMissingSea ? `${format(seaFreightTotal, FOREIGN_CURRENCY)} + 미확정 비용` : format(seaFreightTotal, FOREIGN_CURRENCY);
         const exwDisplay = requiresOrigin ? &#x27;별도 확인&#x27; : &#x27;해당 없음&#x27;;
         const krwDisplay = hasMissingKrw ? `${format(krwTotal, &#x27;KRW&#x27;)} + 미확정 비용` : format(krwTotal, &#x27;KRW&#x27;);
-        root.querySelector(&#x27;#basisLabel&#x27;).textContent = isFcl ? &#x27;컨테이너 수&#x27; : &#x27;최종 CBM&#x27;;
+        root.querySelector(&#x27;#basisLabel&#x27;).textContent = &#x27;최종 CBM&#x27;;
         root.querySelector(&#x27;#previewIncoterm&#x27;).textContent = incoterm.value + &#x27; 2020&#x27;;
         root.querySelector(&#x27;#previewPol&#x27;).textContent = pol.value || &#x27;미선택&#x27;;
         root.querySelector(&#x27;#previewPod&#x27;).textContent = port.options[port.selectedIndex].text;
         root.querySelector(&#x27;#previewMode&#x27;).textContent = mode.value;
         const pkg = Math.max(1, Number(packageCount.value) || 1);
-        root.querySelector(&#x27;#previewBasis&#x27;).textContent = isFcl ? `${equipment.value}FT 컨테이너 × ${q}` : `No of pkg ${pkg} · 최종 ${q} CBM`;
+        const containerSummary = [`20FT × ${count20}`, `40FT × ${count40}`].filter((value, index) =&gt; [count20, count40][index] &gt; 0).join(&#x27; + &#x27;);
+        root.querySelector(&#x27;#previewBasis&#x27;).textContent = isFcl ? (containerSummary || &#x27;컨테이너 수량 입력 필요&#x27;) : `No of pkg ${pkg} · 최종 ${q} CBM`;
         updateAdditionalPreview();
         root.querySelector(&#x27;#previewOriginRow&#x27;).hidden = !requiresOrigin;
         root.querySelector(&#x27;#quoteExwRow&#x27;).hidden = !requiresOrigin;
@@ -1322,12 +1348,15 @@ html&gt;body{padding:0}&lt;/style&gt;
         originAddress.placeholder = requiresOrigin ? &#x27;출고지 상세 주소 입력&#x27; : &#x27;EXW/FCA 선택 시 입력&#x27;;
         finalDestination.disabled = !isFcl;
         port.disabled = false;
-        equipment.hidden = !isFcl;
-        equipment.disabled = !isFcl;
-        packageCount.hidden = isFcl;
+        containerFields.hidden = !isFcl;
+        quantity20.disabled = !isFcl;
+        quantity40.disabled = !isFcl;
+        packageField.hidden = isFcl;
         packageCount.disabled = isFcl;
-        safeRateLookup.disabled = !isFcl || !safeDb;
-        root.querySelector(&#x27;#safeRateHelp&#x27;).textContent = isFcl ? &#x27;FCL 전용 · 시도·시군구·행정동까지 입력&#x27; : &#x27;LCL에서는 안전운임제 DB 조회를 사용할 수 없습니다&#x27;;
+        quantityField.hidden = isFcl;
+        quantity.disabled = isFcl;
+        safeRateLookup.disabled = !isFcl || !safeDb || !hasFclEquipment;
+        root.querySelector(&#x27;#safeRateHelp&#x27;).textContent = isFcl ? (hasFclEquipment ? &#x27;선택한 20FT·40FT를 각각 조회 · 시도·시군구·행정동까지 입력&#x27; : &#x27;20FT 또는 40FT 수량을 1개 이상 입력&#x27;) : &#x27;LCL에서는 안전운임제 DB 조회를 사용할 수 없습니다&#x27;;
         root.querySelector(&#x27;#safeRateStatus&#x27;).textContent = isFcl ? safeRateMessage : &#x27;운송료 별도 확인&#x27;;
         root.querySelector(&#x27;#foreignCurrencySummary&#x27;).textContent = FOREIGN_CURRENCY;
         root.querySelector(&#x27;#exwCurrencySummary&#x27;).textContent = exwCostCurrency;
@@ -1336,7 +1365,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         root.querySelector(&#x27;#seaFreightTotal&#x27;).textContent = seaFreightDisplay;
         root.querySelector(&#x27;#exwTotal&#x27;).textContent = exwDisplay;
         root.querySelector(&#x27;#logistics&#x27;).textContent = krwDisplay;
-        root.querySelector(&#x27;#total&#x27;).textContent = hasMissing ? &#x27;미확정 비용 확인 필요&#x27; : `${format(foreignTotal, FOREIGN_CURRENCY)} + ${format(krwTotal, &#x27;KRW&#x27;)}`;
+        root.querySelector(&#x27;#total&#x27;).textContent = isFcl &amp;&amp; !hasFclEquipment ? &#x27;컨테이너 수량 입력 필요&#x27; : (hasMissing ? &#x27;미확정 비용 확인 필요&#x27; : `${format(foreignTotal, FOREIGN_CURRENCY)} + ${format(krwTotal, &#x27;KRW&#x27;)}`);
         renderCustomerQuoteTotal();
         rows.replaceChildren(...selected.filter(item =&gt; item[6] !== &#x27;additional&#x27;).map(item =&gt; {
           const amount = Number.isFinite(item[2]) ? lineAmount(item) : null;
@@ -1375,27 +1404,38 @@ html&gt;body{padding:0}&lt;/style&gt;
       }
       function lookupSafeRate() {
         const query = normalize(finalDestination.value);
+        const count20 = Math.max(0, Math.floor(Number(quantity20.value) || 0));
+        const count40 = Math.max(0, Math.floor(Number(quantity40.value) || 0));
         if (!query) {
+          safeRates = { &#x27;20&#x27;: null, &#x27;40&#x27;: null };
           safeRateMessage = &#x27;최종 도착지 주소 입력 필요&#x27;;
         } else if (!safeDb) {
+          safeRates = { &#x27;20&#x27;: null, &#x27;40&#x27;: null };
           safeRateMessage = &#x27;안전운임제 DB 준비 중&#x27;;
         } else {
           const matches = safeDb.r.filter(record =&gt; record[0] === Number(port.value) &amp;&amp; [record[1], record[2], record[3]].every(part =&gt; query.includes(normalize(part))));
           if (matches.length !== 1) {
-            safeRate = null;
+            safeRates = { &#x27;20&#x27;: null, &#x27;40&#x27;: null };
             safeRateMessage = matches.length ? &#x27;주소가 여러 행과 일치합니다. 행정동까지 정확히 입력해 주세요&#x27; : &#x27;DB에 일치하는 시도·시군구·행정동이 없습니다&#x27;;
           } else {
             const record = matches[0];
-            safeRate = { amount: equipment.value === &#x27;40&#x27; ? record[5] : record[6], distance: record[4] };
-            safeRateMessage = `${safeDb.p[record[0]]} · ${equipment.value}FT · ${safeRate.distance}km · 안전위탁운임 ${formatKrw(safeRate.amount)}`;
+            safeRates = {
+              &#x27;20&#x27;: count20 &gt; 0 ? { amount: record[6], distance: record[4] } : null,
+              &#x27;40&#x27;: count40 &gt; 0 ? { amount: record[5], distance: record[4] } : null
+            };
+            const rateParts = [
+              safeRates[&#x27;20&#x27;] ? `20FT × ${count20} · ${formatKrw(safeRates[&#x27;20&#x27;].amount * count20)}` : &#x27;&#x27;,
+              safeRates[&#x27;40&#x27;] ? `40FT × ${count40} · ${formatKrw(safeRates[&#x27;40&#x27;].amount * count40)}` : &#x27;&#x27;
+            ].filter(Boolean);
+            safeRateMessage = `${safeDb.p[record[0]]} · ${record[4]}km · ${rateParts.join(&#x27; + &#x27;)}`;
           }
         }
         render();
       }
       safeRateLookup.addEventListener(&#x27;click&#x27;, lookupSafeRate);
-      finalDestination.addEventListener(&#x27;input&#x27;, () =&gt; { safeRate = null; safeRateMessage = finalDestination.value.trim() ? &#x27;안전운임제 DB 조회 대기&#x27; : &#x27;주소 입력 후 안전운임제 DB 조회&#x27;; render(); });
+      finalDestination.addEventListener(&#x27;input&#x27;, () =&gt; { safeRates = { &#x27;20&#x27;: null, &#x27;40&#x27;: null }; safeRateMessage = finalDestination.value.trim() ? &#x27;안전운임제 DB 조회 대기&#x27; : &#x27;주소 입력 후 안전운임제 DB 조회&#x27;; render(); });
       originAddress.addEventListener(&#x27;input&#x27;, render);
-      [incoterm, pol, mode, port, equipment, packageCount, quantity].forEach(input =&gt; [&#x27;input&#x27;, &#x27;change&#x27;].forEach(event =&gt; input.addEventListener(event, () =&gt; { if (input === mode || input === port || input === equipment) safeRate = null; render(); })));
+      [incoterm, pol, mode, port, quantity20, quantity40, packageCount, quantity].forEach(input =&gt; [&#x27;input&#x27;, &#x27;change&#x27;].forEach(event =&gt; input.addEventListener(event, () =&gt; { if (input === mode || input === port || input === quantity20 || input === quantity40) safeRates = { &#x27;20&#x27;: null, &#x27;40&#x27;: null }; render(); })));
       [quoteSeaFreight, quoteExwAmount, quoteDestinationKrw].forEach(input =&gt; input.addEventListener(&#x27;input&#x27;, renderCustomerQuoteTotal));
       partnerRecommend.addEventListener(&#x27;click&#x27;, recommendPartners);
       pdfPreview.addEventListener(&#x27;click&#x27;, () =&gt; {
