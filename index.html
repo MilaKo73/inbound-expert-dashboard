@@ -897,6 +897,8 @@ html&gt;body{padding:0}&lt;/style&gt;
     #fcl-lcl-dashboard h2, #fcl-lcl-dashboard h3 { color:var(--blue); }
     #fcl-lcl-dashboard .dash-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     #fcl-lcl-dashboard .dash-rule { padding-top:10px; border-top:1px solid color-mix(in srgb, var(--blue) 40%, var(--border)); }
+    #fcl-lcl-dashboard .quote-freight-grid { display:grid; grid-template-columns:repeat(2, minmax(150px, 1fr)); gap:10px; }
+    #fcl-lcl-dashboard .quote-freight-field { display:grid; grid-template-columns:auto minmax(90px, 1fr) auto; gap:8px; align-items:center; }
     #fcl-lcl-dashboard .print-only { display:none; }
     @media print {
       @page { size:A4 portrait; margin:12mm; }
@@ -908,7 +910,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       #fcl-lcl-dashboard #quote-title { display:none; }
       #fcl-lcl-dashboard .no-print { display:none !important; }
     }
-    @media (max-width: 560px) { #fcl-lcl-dashboard .dash-split { grid-template-columns:1fr; } }
+    @media (max-width: 560px) { #fcl-lcl-dashboard .dash-split, #fcl-lcl-dashboard .quote-freight-grid { grid-template-columns:1fr; } }
   &lt;/style&gt;
   &lt;nav class=&quot;viz-row&quot; aria-label=&quot;업무 SHEET&quot; role=&quot;tablist&quot;&gt;
     &lt;button class=&quot;btn btn-primary&quot; id=&quot;quoteMenu&quot; type=&quot;button&quot; role=&quot;tab&quot; aria-selected=&quot;true&quot; aria-controls=&quot;quoteView&quot;&gt;수입견적 SHEET&lt;/button&gt;
@@ -977,7 +979,13 @@ html&gt;body{padding:0}&lt;/style&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;운송 방식&lt;/th&gt;&lt;td id=&quot;previewMode&quot;&gt;FCL&lt;/td&gt;&lt;/tr&gt;
           &lt;tr id=&quot;previewOriginRow&quot; hidden&gt;&lt;th scope=&quot;row&quot;&gt;출고지 주소&lt;/th&gt;&lt;td id=&quot;previewOrigin&quot;&gt;입력 필요&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;계산 기준&lt;/th&gt;&lt;td id=&quot;previewBasis&quot;&gt;40FT 컨테이너 × 1&lt;/td&gt;&lt;/tr&gt;
-          &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;해상운임 합계&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteSeaFreight&quot;&gt;해상운임 합계 외화 금액&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteSeaFreight&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;금액 입력&quot;&gt; &lt;span class=&quot;text-small text-muted&quot; id=&quot;quoteForeignCurrency&quot;&gt;USD&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+          &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;해상운임 합계&lt;/th&gt;&lt;td&gt;
+            &lt;div class=&quot;quote-freight-grid&quot; id=&quot;quoteSeaFreightFcl&quot;&gt;
+              &lt;label class=&quot;quote-freight-field&quot; id=&quot;quoteSeaFreight20Field&quot; for=&quot;quoteSeaFreight20&quot;&gt;&lt;span id=&quot;quoteSeaFreight20Label&quot;&gt;20FT&lt;/span&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteSeaFreight20&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;20FT 합계&quot;&gt;&lt;span class=&quot;text-small text-muted&quot; data-quote-foreign-currency&gt;USD&lt;/span&gt;&lt;/label&gt;
+              &lt;label class=&quot;quote-freight-field&quot; id=&quot;quoteSeaFreight40Field&quot; for=&quot;quoteSeaFreight40&quot;&gt;&lt;span id=&quot;quoteSeaFreight40Label&quot;&gt;40FT&lt;/span&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteSeaFreight40&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;40FT 합계&quot;&gt;&lt;span class=&quot;text-small text-muted&quot; data-quote-foreign-currency&gt;USD&lt;/span&gt;&lt;/label&gt;
+            &lt;/div&gt;
+            &lt;label class=&quot;quote-freight-field&quot; id=&quot;quoteSeaFreightLcl&quot; for=&quot;quoteSeaFreight&quot; hidden&gt;&lt;span&gt;LCL&lt;/span&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteSeaFreight&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;해상운임 합계&quot;&gt;&lt;span class=&quot;text-small text-muted&quot; data-quote-foreign-currency&gt;USD&lt;/span&gt;&lt;/label&gt;
+          &lt;/td&gt;&lt;/tr&gt;
           &lt;tr id=&quot;quoteExwRow&quot; hidden&gt;&lt;th scope=&quot;row&quot;&gt;EXW 비용&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteExwAmount&quot;&gt;EXW 비용 외화 금액&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteExwAmount&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;별도 확인&quot;&gt; &lt;span class=&quot;text-small text-muted&quot; id=&quot;quoteExwCurrency&quot;&gt;USD&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;도착지 비용 합계&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteDestinationKrw&quot;&gt;도착지 비용 합계 KRW&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteDestinationKrw&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;1&quot; inputmode=&quot;numeric&quot; placeholder=&quot;금액 입력&quot;&gt; &lt;span class=&quot;text-small text-muted&quot;&gt;KRW&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;최종 도착지 운송료&lt;/th&gt;&lt;td id=&quot;safeRateStatus&quot;&gt;안전운임제 DB 로드 중&lt;/td&gt;&lt;/tr&gt;
@@ -1041,6 +1049,8 @@ html&gt;body{padding:0}&lt;/style&gt;
       const FOREIGN_CURRENCY = &#x27;USD&#x27;;
       const COMMON_CURRENCIES = [&#x27;USD&#x27;, &#x27;EUR&#x27;, &#x27;CNY&#x27;, &#x27;JPY&#x27;, &#x27;GBP&#x27;, &#x27;SGD&#x27;, &#x27;HKD&#x27;, &#x27;AUD&#x27;, &#x27;CAD&#x27;, &#x27;CHF&#x27;, &#x27;AED&#x27;, &#x27;THB&#x27;, &#x27;VND&#x27;];
       const quoteSeaFreight = root.querySelector(&#x27;#quoteSeaFreight&#x27;);
+      const quoteSeaFreight20 = root.querySelector(&#x27;#quoteSeaFreight20&#x27;);
+      const quoteSeaFreight40 = root.querySelector(&#x27;#quoteSeaFreight40&#x27;);
       const quoteExwAmount = root.querySelector(&#x27;#quoteExwAmount&#x27;);
       const quoteDestinationKrw = root.querySelector(&#x27;#quoteDestinationKrw&#x27;);
       const partnerRecommend = root.querySelector(&#x27;#partnerRecommend&#x27;);
@@ -1290,7 +1300,15 @@ html&gt;body{padding:0}&lt;/style&gt;
         return row;
       }
       function renderCustomerQuoteTotal() {
-        const seaFreight = quoteSeaFreight.value.trim() === &#x27;&#x27; ? null : Number(quoteSeaFreight.value);
+        const isFcl = mode.value === &#x27;FCL&#x27;;
+        const activeSeaFreightInputs = isFcl
+          ? [[quantity20, quoteSeaFreight20], [quantity40, quoteSeaFreight40]].filter(([count]) =&gt; Number(count.value) &gt; 0).map(([, input]) =&gt; input)
+          : [quoteSeaFreight];
+        const seaFreightAmounts = activeSeaFreightInputs
+          .filter(input =&gt; input.value.trim() !== &#x27;&#x27;)
+          .map(input =&gt; Number(input.value))
+          .filter(amount =&gt; Number.isFinite(amount) &amp;&amp; amount &gt;= 0);
+        const seaFreight = seaFreightAmounts.length ? seaFreightAmounts.reduce((total, amount) =&gt; total + amount, 0) : null;
         const requiresExwCost = incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;;
         const exwAmount = requiresExwCost &amp;&amp; quoteExwAmount.value.trim() !== &#x27;&#x27; ? Number(quoteExwAmount.value) : null;
         const krw = quoteDestinationKrw.value.trim() === &#x27;&#x27; ? null : Number(quoteDestinationKrw.value);
@@ -1346,6 +1364,15 @@ html&gt;body{padding:0}&lt;/style&gt;
         updateAdditionalPreview();
         root.querySelector(&#x27;#previewOriginRow&#x27;).hidden = !requiresOrigin;
         root.querySelector(&#x27;#quoteExwRow&#x27;).hidden = !requiresOrigin;
+        root.querySelector(&#x27;#quoteSeaFreightFcl&#x27;).hidden = !isFcl;
+        root.querySelector(&#x27;#quoteSeaFreightLcl&#x27;).hidden = isFcl;
+        root.querySelector(&#x27;#quoteSeaFreight20Field&#x27;).hidden = !isFcl || count20 === 0;
+        root.querySelector(&#x27;#quoteSeaFreight40Field&#x27;).hidden = !isFcl || count40 === 0;
+        quoteSeaFreight20.disabled = !isFcl || count20 === 0;
+        quoteSeaFreight40.disabled = !isFcl || count40 === 0;
+        quoteSeaFreight.disabled = isFcl;
+        root.querySelector(&#x27;#quoteSeaFreight20Label&#x27;).textContent = `20FT × ${count20}`;
+        root.querySelector(&#x27;#quoteSeaFreight40Label&#x27;).textContent = `40FT × ${count40}`;
         root.querySelector(&#x27;#previewOrigin&#x27;).textContent = originAddress.value.trim() || &#x27;입력 필요&#x27;;
         originAddress.disabled = !requiresOrigin;
         originAddress.placeholder = requiresOrigin ? &#x27;출고지 상세 주소 입력&#x27; : &#x27;EXW/FCA 선택 시 입력&#x27;;
@@ -1363,7 +1390,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         root.querySelector(&#x27;#safeRateStatus&#x27;).textContent = isFcl ? safeRateMessage : &#x27;운송료 별도 확인&#x27;;
         root.querySelector(&#x27;#foreignCurrencySummary&#x27;).textContent = FOREIGN_CURRENCY;
         root.querySelector(&#x27;#exwCurrencySummary&#x27;).textContent = exwCostCurrency;
-        root.querySelector(&#x27;#quoteForeignCurrency&#x27;).textContent = FOREIGN_CURRENCY;
+        root.querySelectorAll(&#x27;[data-quote-foreign-currency]&#x27;).forEach(label =&gt; { label.textContent = FOREIGN_CURRENCY; });
         root.querySelector(&#x27;#quoteExwCurrency&#x27;).textContent = exwCostCurrency;
         root.querySelector(&#x27;#seaFreightTotal&#x27;).textContent = seaFreightDisplay;
         root.querySelector(&#x27;#exwTotal&#x27;).textContent = exwDisplay;
@@ -1439,7 +1466,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       finalDestination.addEventListener(&#x27;input&#x27;, () =&gt; { safeRates = { &#x27;20&#x27;: null, &#x27;40&#x27;: null }; safeRateMessage = finalDestination.value.trim() ? &#x27;안전운임제 DB 조회 대기&#x27; : &#x27;주소 입력 후 안전운임제 DB 조회&#x27;; render(); });
       originAddress.addEventListener(&#x27;input&#x27;, render);
       [incoterm, pol, mode, port, quantity20, quantity40, packageCount, quantity].forEach(input =&gt; [&#x27;input&#x27;, &#x27;change&#x27;].forEach(event =&gt; input.addEventListener(event, () =&gt; { if (input === mode || input === port || input === quantity20 || input === quantity40) safeRates = { &#x27;20&#x27;: null, &#x27;40&#x27;: null }; render(); })));
-      [quoteSeaFreight, quoteExwAmount, quoteDestinationKrw].forEach(input =&gt; input.addEventListener(&#x27;input&#x27;, renderCustomerQuoteTotal));
+      [quoteSeaFreight, quoteSeaFreight20, quoteSeaFreight40, quoteExwAmount, quoteDestinationKrw].forEach(input =&gt; input.addEventListener(&#x27;input&#x27;, renderCustomerQuoteTotal));
       partnerRecommend.addEventListener(&#x27;click&#x27;, recommendPartners);
       pdfPreview.addEventListener(&#x27;click&#x27;, () =&gt; {
         const previewWindow = window.open(&#x27;&#x27;, &#x27;inboundQuotePreview&#x27;, &#x27;width=900,height=900,resizable=yes,scrollbars=yes&#x27;);
