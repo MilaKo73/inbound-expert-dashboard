@@ -1230,17 +1230,20 @@ html&gt;body{padding:0}&lt;/style&gt;
             { size: &#x27;20&#x27;, quantity: Math.max(0, Math.floor(Number(quantity20.value) || 0)) },
             { size: &#x27;40&#x27;, quantity: Math.max(0, Math.floor(Number(quantity40.value) || 0)) }
           ].filter(item =&gt; item.quantity &gt; 0);
-          selected = equipmentSelections.flatMap(item =&gt; [
-            [&#x27;해상 운임&#x27;, `${item.size}FT × ${item.quantity}`, 850, &#x27;USD&#x27;, false, null, null, item.quantity],
-            [&#x27;도착지 부대비용&#x27;, `${item.size}FT × ${item.quantity} · 도착지 확인`, null, &#x27;USD&#x27;, false, null, null, item.quantity],
-            [&#x27;도착지 THC외&#x27;, `${item.size}FT × ${item.quantity}`, 360000, &#x27;KRW&#x27;, false, null, null, item.quantity],
-            [&#x27;내륙운송&#x27;, `안전운임제 DB · ${item.size}FT × ${item.quantity}`, safeRates[item.size] ? safeRates[item.size].amount : null, &#x27;KRW&#x27;, false, null, null, item.quantity]
-          ]);
+          selected = [
+            ...equipmentSelections.map(item =&gt; [&#x27;해상 운임&#x27;, `${item.size}FT × ${item.quantity}`, 850, &#x27;USD&#x27;, false, null, null, item.quantity]),
+            ...equipmentSelections.map(item =&gt; [&#x27;도착지 부대비용&#x27;, `${item.size}FT × ${item.quantity} · 도착지 확인`, null, &#x27;USD&#x27;, false, null, null, item.quantity]),
+            ...equipmentSelections.map(item =&gt; [&#x27;도착지 THC외&#x27;, `${item.size}FT × ${item.quantity}`, 360000, &#x27;KRW&#x27;, false, null, null, item.quantity]),
+            ...equipmentSelections.map(item =&gt; [&#x27;내륙운송&#x27;, `안전운임제 DB · ${item.size}FT × ${item.quantity}`, safeRates[item.size] ? safeRates[item.size].amount : null, &#x27;KRW&#x27;, false, null, null, item.quantity])
+          ];
           selected.push([&#x27;통관 수수료&#x27;, &#x27;신고 건&#x27;, 180000, &#x27;KRW&#x27;, true], [&#x27;항만 보안·서류비&#x27;, &#x27;신고 건&#x27;, 55000, &#x27;KRW&#x27;, true]);
         } else {
           selected = costs.LCL.map(item =&gt; [...item]);
         }
-        if (incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;) selected.splice(1, 0, [&#x27;EXW 비용&#x27;, &#x27;별도 확인&#x27;, null, exwCostCurrency, true, &#x27;별도 확인&#x27;]);
+        if (incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;) {
+          const firstKrwIndex = selected.findIndex(item =&gt; item[3] === &#x27;KRW&#x27;);
+          selected.splice(firstKrwIndex === -1 ? selected.length : firstKrwIndex, 0, [&#x27;EXW 비용&#x27;, &#x27;별도 확인&#x27;, null, exwCostCurrency, true, &#x27;별도 확인&#x27;]);
+        }
         selected.push([&#x27;기타 추가 비용&#x27;, &#x27;세부 항목명 입력&#x27;, additionalCostValue, &#x27;KRW&#x27;, true, null, &#x27;additional&#x27;]);
         return selected;
       }
