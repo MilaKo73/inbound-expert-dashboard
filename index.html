@@ -978,7 +978,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           &lt;tr id=&quot;previewOriginRow&quot; hidden&gt;&lt;th scope=&quot;row&quot;&gt;출고지 주소&lt;/th&gt;&lt;td id=&quot;previewOrigin&quot;&gt;입력 필요&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;계산 기준&lt;/th&gt;&lt;td id=&quot;previewBasis&quot;&gt;40FT 컨테이너 × 1&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;해상운임 합계&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteSeaFreight&quot;&gt;해상운임 합계 외화 금액&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteSeaFreight&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;금액 입력&quot;&gt; &lt;span class=&quot;text-small text-muted&quot; id=&quot;quoteForeignCurrency&quot;&gt;USD&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-          &lt;tr id=&quot;quoteExwRow&quot; hidden&gt;&lt;th scope=&quot;row&quot;&gt;EXW 비용&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteExwAmount&quot;&gt;EXW 비용 외화 금액&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteExwAmount&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;별도 확인&quot;&gt; &lt;span class=&quot;text-small text-muted&quot;&gt;USD&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+          &lt;tr id=&quot;quoteExwRow&quot; hidden&gt;&lt;th scope=&quot;row&quot;&gt;EXW 비용&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteExwAmount&quot;&gt;EXW 비용 외화 금액&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteExwAmount&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; inputmode=&quot;decimal&quot; placeholder=&quot;별도 확인&quot;&gt; &lt;span class=&quot;text-small text-muted&quot; id=&quot;quoteExwCurrency&quot;&gt;USD&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;도착지 비용 합계&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;quoteDestinationKrw&quot;&gt;도착지 비용 합계 KRW&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;quoteDestinationKrw&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;1&quot; inputmode=&quot;numeric&quot; placeholder=&quot;금액 입력&quot;&gt; &lt;span class=&quot;text-small text-muted&quot;&gt;KRW&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;최종 도착지 운송료&lt;/th&gt;&lt;td id=&quot;safeRateStatus&quot;&gt;안전운임제 DB 로드 중&lt;/td&gt;&lt;/tr&gt;
           &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;기타 추가 비용&lt;/th&gt;&lt;td id=&quot;previewAdditional&quot;&gt;없음&lt;/td&gt;&lt;/tr&gt;
@@ -1078,7 +1078,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       };
       let safeDb = null;
       let safeRate = null;
-      let destinationChargeCurrency = &#x27;USD&#x27;;
+      let exwCostCurrency = &#x27;USD&#x27;;
       let renderedPortMode = null;
       let safeRateMessage = &#x27;안전운임제 DB 로드 중&#x27;;
       const normalize = value =&gt; String(value || &#x27;&#x27;).replace(/[\s,]/g, &#x27;&#x27;);
@@ -1222,10 +1222,9 @@ html&gt;body{padding:0}&lt;/style&gt;
       function selectedCosts() {
         const selected = costs[mode.value].map(item =&gt; {
           if (item[0] === &#x27;내륙운송&#x27; &amp;&amp; mode.value === &#x27;FCL&#x27;) return [item[0], item[1], safeRate ? safeRate.amount : null, &#x27;KRW&#x27;];
-          if (item[0] === &#x27;도착지 부대비용&#x27;) return [item[0], item[1], item[2], destinationChargeCurrency, item[4]];
           return item;
         });
-        if (incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;) selected.splice(1, 0, [&#x27;EXW 비용&#x27;, &#x27;별도 확인&#x27;, null, FOREIGN_CURRENCY, true, &#x27;별도 확인&#x27;]);
+        if (incoterm.value === &#x27;EXW&#x27; || incoterm.value === &#x27;FCA&#x27;) selected.splice(1, 0, [&#x27;EXW 비용&#x27;, &#x27;별도 확인&#x27;, null, exwCostCurrency, true, &#x27;별도 확인&#x27;]);
         const extra = Math.max(0, Number(additionalCost.value) || 0);
         if (extra) selected.push([additionalCostName.value.trim() || &#x27;기타 추가 비용&#x27;, &#x27;건별&#x27;, extra, &#x27;KRW&#x27;, true]);
         return selected;
@@ -1236,8 +1235,10 @@ html&gt;body{padding:0}&lt;/style&gt;
         const exwAmount = requiresExwCost &amp;&amp; quoteExwAmount.value.trim() !== &#x27;&#x27; ? Number(quoteExwAmount.value) : null;
         const krw = quoteDestinationKrw.value.trim() === &#x27;&#x27; ? null : Number(quoteDestinationKrw.value);
         const totals = [];
-        const foreignAmounts = [seaFreight, exwAmount].filter(value =&gt; Number.isFinite(value) &amp;&amp; value &gt;= 0);
-        if (foreignAmounts.length) totals.push(format(foreignAmounts.reduce((sum, value) =&gt; sum + value, 0), FOREIGN_CURRENCY));
+        const currencyTotals = new Map();
+        if (Number.isFinite(seaFreight) &amp;&amp; seaFreight &gt;= 0) currencyTotals.set(FOREIGN_CURRENCY, seaFreight);
+        if (Number.isFinite(exwAmount) &amp;&amp; exwAmount &gt;= 0) currencyTotals.set(exwCostCurrency, (currencyTotals.get(exwCostCurrency) || 0) + exwAmount);
+        currencyTotals.forEach((amount, currency) =&gt; totals.push(format(amount, currency)));
         if (Number.isFinite(krw) &amp;&amp; krw &gt;= 0) totals.push(format(krw, &#x27;KRW&#x27;));
         root.querySelector(&#x27;#previewLogistics&#x27;).textContent = totals.length ? totals.join(&#x27; + &#x27;) : &#x27;금액 입력 필요&#x27;;
       }
@@ -1295,8 +1296,9 @@ html&gt;body{padding:0}&lt;/style&gt;
         root.querySelector(&#x27;#safeRateHelp&#x27;).textContent = isFcl ? &#x27;FCL 전용 · 시도·시군구·행정동까지 입력&#x27; : &#x27;LCL에서는 안전운임제 DB 조회를 사용할 수 없습니다&#x27;;
         root.querySelector(&#x27;#safeRateStatus&#x27;).textContent = isFcl ? safeRateMessage : &#x27;운송료 별도 확인&#x27;;
         root.querySelector(&#x27;#foreignCurrencySummary&#x27;).textContent = FOREIGN_CURRENCY;
-        root.querySelector(&#x27;#exwCurrencySummary&#x27;).textContent = FOREIGN_CURRENCY;
+        root.querySelector(&#x27;#exwCurrencySummary&#x27;).textContent = exwCostCurrency;
         root.querySelector(&#x27;#quoteForeignCurrency&#x27;).textContent = FOREIGN_CURRENCY;
+        root.querySelector(&#x27;#quoteExwCurrency&#x27;).textContent = exwCostCurrency;
         root.querySelector(&#x27;#seaFreightTotal&#x27;).textContent = seaFreightDisplay;
         root.querySelector(&#x27;#exwTotal&#x27;).textContent = exwDisplay;
         root.querySelector(&#x27;#logistics&#x27;).textContent = krwDisplay;
@@ -1311,19 +1313,19 @@ html&gt;body{padding:0}&lt;/style&gt;
             row.append(cell);
           });
           const currencyCell = document.createElement(&#x27;td&#x27;);
-          if (item[0] === &#x27;도착지 부대비용&#x27;) {
+          if (item[0] === &#x27;EXW 비용&#x27;) {
             const currencySelect = document.createElement(&#x27;select&#x27;);
             currencySelect.className = &#x27;form-select&#x27;;
-            currencySelect.setAttribute(&#x27;aria-label&#x27;, &#x27;도착지 부대비용 통화&#x27;);
+            currencySelect.setAttribute(&#x27;aria-label&#x27;, &#x27;EXW 비용 통화&#x27;);
             COMMON_CURRENCIES.forEach(currency =&gt; {
               const option = document.createElement(&#x27;option&#x27;);
               option.value = currency;
               option.textContent = currency;
-              option.selected = currency === destinationChargeCurrency;
+              option.selected = currency === exwCostCurrency;
               currencySelect.append(option);
             });
             currencySelect.addEventListener(&#x27;change&#x27;, () =&gt; {
-              destinationChargeCurrency = currencySelect.value;
+              exwCostCurrency = currencySelect.value;
               render();
             });
             currencyCell.append(currencySelect);
