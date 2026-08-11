@@ -964,7 +964,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;dash-layout&quot;&gt;
-      &lt;section aria-labelledby=&quot;breakdown-title&quot;&gt;&lt;h3 id=&quot;breakdown-title&quot;&gt;해상 수입 비용 내역&lt;/h3&gt;&lt;div class=&quot;table-responsive&quot;&gt;&lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;비용 항목&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;계산 기준&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;통화&lt;/th&gt;&lt;th scope=&quot;col&quot; class=&quot;text-end&quot;&gt;금액&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;costRows&quot; aria-live=&quot;polite&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/section&gt;
+      &lt;section aria-labelledby=&quot;breakdown-title&quot;&gt;&lt;h3 id=&quot;breakdown-title&quot;&gt;해상 수입 비용 내역&lt;/h3&gt;&lt;div class=&quot;table-responsive&quot;&gt;&lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;비용 항목&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;계산 기준&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;통화&lt;/th&gt;&lt;th scope=&quot;col&quot; class=&quot;text-end&quot;&gt;금액&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;비고&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;costRows&quot; aria-live=&quot;polite&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/section&gt;
       &lt;section class=&quot;card&quot; aria-labelledby=&quot;partner-title&quot;&gt;
         &lt;h3 id=&quot;partner-title&quot;&gt;해외 파트너 추천&lt;/h3&gt;
         &lt;div id=&quot;partnerStatus&quot; class=&quot;text-small text-muted&quot;&gt;해외 POL 또는 국가·도시를 입력해 주세요.&lt;/div&gt;
@@ -1426,7 +1426,9 @@ html&gt;body{padding:0}&lt;/style&gt;
           root.querySelector(&#x27;#additionalCost&#x27;).focus();
         });
         amountCell.append(amountInput);
-        row.append(itemCell, detailCell, currencyCell, amountCell);
+        const noteCell = document.createElement(&#x27;td&#x27;);
+        noteCell.textContent = &#x27;사용자 입력&#x27;;
+        row.append(itemCell, detailCell, currencyCell, amountCell, noteCell);
         return row;
       }
       function renderCustomerQuoteTotal() {
@@ -1559,7 +1561,13 @@ html&gt;body{padding:0}&lt;/style&gt;
           const amountCell = document.createElement(&#x27;td&#x27;);
           amountCell.className = &#x27;text-end&#x27;;
           amountCell.textContent = amount === null ? (item[5] || &#x27;RATE_REQUIRED&#x27;) : format(amount, item[3]);
-          row.append(currencyCell, amountCell);
+          const noteCell = document.createElement(&#x27;td&#x27;);
+          if (item[0] === &#x27;EXW 비용&#x27;) noteCell.textContent = &#x27;EXW/FCA 조건 · 별도 확인&#x27;;
+          else if (item[0] === &#x27;도착지 부대비용&#x27;) noteCell.textContent = &#x27;도착지 요율 확인 필요&#x27;;
+          else if (item[0] === &#x27;도착지 CFS 창고료&#x27;) noteCell.textContent = &#x27;실비 정산&#x27;;
+          else if (item[0] === &#x27;내륙운송&#x27;) noteCell.textContent = mode.value === &#x27;FCL&#x27; ? (amount === null ? &#x27;안전운임제 DB 조회 필요&#x27; : &#x27;안전운임제 DB 조회값&#x27;) : &#x27;LCL · 별도 확인&#x27;;
+          else noteCell.textContent = amount === null ? &#x27;RATE_REQUIRED&#x27; : &#x27;기본 견적 항목&#x27;;
+          row.append(currencyCell, amountCell, noteCell);
           return row;
         }), createAdditionalCostRow());
       }
