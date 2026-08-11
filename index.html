@@ -1009,7 +1009,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;div class=&quot;viz-row&quot;&gt;&lt;h2 id=&quot;partner-manage-title&quot;&gt;해외파트너 디렉토리&lt;/h2&gt;&lt;span class=&quot;viz-badge&quot; id=&quot;partnerManageCount&quot;&gt;0곳&lt;/span&gt;&lt;/div&gt;
     &lt;div class=&quot;viz-controls&quot; aria-label=&quot;파트너 검색 및 입력&quot;&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;partnerSearch&quot;&gt;파트너 검색
-        &lt;input class=&quot;form-control&quot; id=&quot;partnerSearch&quot; type=&quot;search&quot; placeholder=&quot;파트너 명, 대륙, 도시 / 선적항&quot;&gt;
+        &lt;input class=&quot;form-control&quot; id=&quot;partnerSearch&quot; type=&quot;search&quot; placeholder=&quot;파트너 명, 대륙, 도시 / 선적항, 이메일&quot;&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;partnerCompany&quot;&gt;회사명
         &lt;input class=&quot;form-control&quot; id=&quot;partnerCompany&quot; type=&quot;text&quot; required&gt;
@@ -1019,6 +1019,9 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;partnerCity&quot;&gt;도시 / 선적항
         &lt;input class=&quot;form-control&quot; id=&quot;partnerCity&quot; type=&quot;text&quot; required&gt;
+      &lt;/label&gt;
+      &lt;label class=&quot;form-label&quot; for=&quot;partnerEmail&quot;&gt;이메일 주소
+        &lt;input class=&quot;form-control&quot; id=&quot;partnerEmail&quot; type=&quot;email&quot; placeholder=&quot;예: contact@partner.com&quot; autocomplete=&quot;email&quot;&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;partnerContract&quot;&gt;계약 구분
         &lt;input class=&quot;form-control&quot; id=&quot;partnerContract&quot; type=&quot;text&quot; placeholder=&quot;예: WCA, COOP, 파일 첨부&quot;&gt;
@@ -1030,7 +1033,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;div id=&quot;partnerManageStatus&quot; class=&quot;text-small text-muted&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
     &lt;div class=&quot;table-responsive&quot;&gt;
       &lt;table class=&quot;table table-sm&quot;&gt;
-        &lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;파트너 명&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;대륙&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;도시 / 선적항&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;관리&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+        &lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;파트너 명&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;대륙&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;도시 / 선적항&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;이메일 주소&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;관리&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
         &lt;tbody id=&quot;partnerManageRows&quot;&gt;&lt;/tbody&gt;
       &lt;/table&gt;
     &lt;/div&gt;
@@ -1082,6 +1085,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       const partnerCompany = root.querySelector(&#x27;#partnerCompany&#x27;);
       const partnerCountry = root.querySelector(&#x27;#partnerCountry&#x27;);
       const partnerCity = root.querySelector(&#x27;#partnerCity&#x27;);
+      const partnerEmail = root.querySelector(&#x27;#partnerEmail&#x27;);
       const partnerContract = root.querySelector(&#x27;#partnerContract&#x27;);
       const partnerSave = root.querySelector(&#x27;#partnerSave&#x27;);
       const partnerCancelEdit = root.querySelector(&#x27;#partnerCancelEdit&#x27;);
@@ -1104,7 +1108,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         [&#x27;IMP-20260802-001&#x27;,&#x27;2026-08-02T08:25:00.000Z&#x27;,&#x27;테스트메디컬 I&#x27;,&#x27;Los Angeles&#x27;,&#x27;부산신항&#x27;,&#x27;FCL&#x27;,&#x27;CIF 2020&#x27;,&#x27;20FT × 1&#x27;,&#x27;대전광역시 유성구&#x27;,&#x27;2350&#x27;,&#x27;&#x27;,&#x27;&#x27;,&#x27;&#x27;, &#x27;720000&#x27;,&#x27;1,950,000 KRW&#x27;,&#x27;정밀검사비 · 250,000 KRW&#x27;,&#x27;2,350 USD + 2,920,000 KRW&#x27;],
         [&#x27;IMP-20260801-001&#x27;,&#x27;2026-08-01T00:40:00.000Z&#x27;,&#x27;가상소재 J&#x27;,&#x27;Kaohsiung&#x27;,&#x27;인천항&#x27;,&#x27;LCL&#x27;,&#x27;FOB 2020&#x27;,&#x27;No of pkg 18 · 최종 6 CBM&#x27;,&#x27;인천광역시 남동구&#x27;,&#x27;&#x27;,&#x27;&#x27;,&#x27;510&#x27;,&#x27;&#x27;,&#x27;470000&#x27;,&#x27;운송료 별도 확인&#x27;,&#x27;CFS 창고료 · 실비&#x27;,&#x27;510 USD + 470,000 KRW&#x27;]
       ].map(([refNo,createdAt,customer,pol,pod,mode,incoterm,basis,destination,seaFreight20,seaFreight40,seaFreightLcl,exwAmount,destinationKrw,inland,additional,total]) =&gt; ({ refNo, createdAt, customer, pol, pod, mode, incoterm, basis, destination, seaFreight20, seaFreight40, seaFreightLcl, exwAmount, exwCurrency: &#x27;USD&#x27;, destinationKrw, inland, additional, total, origin: incoterm.startsWith(&#x27;EXW&#x27;) || incoterm.startsWith(&#x27;FCA&#x27;) ? &#x27;가상 해외 출고지 주소&#x27; : &#x27;&#x27;, status: &#x27;SAMPLE · INDICATIVE&#x27; }));
-      const defaultPartners = () =&gt; PARTNER_DB.map((record, index) =&gt; ({ id: `base-${index}`, name: record[0], country: record[1], city: record[2], contract: record[4] &amp;&amp; record[4] !== &#x27;nan&#x27; ? record[4] : &#x27;&#x27;, active: Number(record[5]) || 0 }));
+      const defaultPartners = () =&gt; PARTNER_DB.map((record, index) =&gt; ({ id: `base-${index}`, name: record[0], country: record[1], city: record[2], email: &#x27;&#x27;, contract: record[4] &amp;&amp; record[4] !== &#x27;nan&#x27; ? record[4] : &#x27;&#x27;, active: Number(record[5]) || 0 }));
       let managedPartners;
       let quoteRecords = [];
       let editingPartnerId = null;
@@ -1189,6 +1193,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         partnerCompany.value = &#x27;&#x27;;
         partnerCountry.value = &#x27;&#x27;;
         partnerCity.value = &#x27;&#x27;;
+        partnerEmail.value = &#x27;&#x27;;
         partnerContract.value = &#x27;&#x27;;
         partnerSave.textContent = &#x27;파트너 추가&#x27;;
         partnerCancelEdit.hidden = true;
@@ -1198,6 +1203,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         partnerCompany.value = record.name;
         partnerCountry.value = record.country;
         partnerCity.value = record.city;
+        partnerEmail.value = record.email || &#x27;&#x27;;
         partnerContract.value = record.contract;
         partnerSave.textContent = &#x27;수정 저장&#x27;;
         partnerCancelEdit.hidden = false;
@@ -1220,7 +1226,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       }
       function renderPartnerManagement() {
         const query = normalize(partnerSearch.value).toLowerCase();
-        const filtered = managedPartners.filter(record =&gt; !query || [record.name, continentOf(record.country), record.city].some(value =&gt; normalize(value).toLowerCase().includes(query)));
+        const filtered = managedPartners.filter(record =&gt; !query || [record.name, continentOf(record.country), record.city, record.email || &#x27;&#x27;].some(value =&gt; normalize(value).toLowerCase().includes(query)));
         const visible = filtered.slice(0, 50);
         root.querySelector(&#x27;#partnerManageCount&#x27;).textContent = `${managedPartners.length}곳`;
         partnerManageStatus.textContent = filtered.length &gt; visible.length ? `검색 결과 ${filtered.length}곳 중 50곳을 표시합니다.` : `검색 결과 ${filtered.length}곳`;
@@ -1231,6 +1237,16 @@ html&gt;body{padding:0}&lt;/style&gt;
             cell.textContent = value;
             row.append(cell);
           });
+          const emailCell = document.createElement(&#x27;td&#x27;);
+          if (record.email) {
+            const emailLink = document.createElement(&#x27;a&#x27;);
+            emailLink.href = `mailto:${record.email}`;
+            emailLink.textContent = record.email;
+            emailCell.append(emailLink);
+          } else {
+            emailCell.textContent = &#x27;미등록&#x27;;
+          }
+          row.append(emailCell);
           const actions = document.createElement(&#x27;td&#x27;);
           const editButton = document.createElement(&#x27;button&#x27;);
           editButton.type = &#x27;button&#x27;;
@@ -1351,11 +1367,17 @@ html&gt;body{padding:0}&lt;/style&gt;
         const name = partnerCompany.value.trim();
         const country = partnerCountry.value.trim();
         const city = partnerCity.value.trim();
+        const email = partnerEmail.value.trim();
         if (!name || !country || !city) {
           partnerManageStatus.textContent = &#x27;회사명, 국가, 도시·선적항을 모두 입력해 주세요.&#x27;;
           return;
         }
-        const record = { id: editingPartnerId || `custom-${Date.now()}`, name, country, city, contract: partnerContract.value.trim(), active: 1 };
+        if (email &amp;&amp; !partnerEmail.checkValidity()) {
+          partnerManageStatus.textContent = &#x27;올바른 이메일 주소 형식으로 입력해 주세요.&#x27;;
+          partnerEmail.focus();
+          return;
+        }
+        const record = { id: editingPartnerId || `custom-${Date.now()}`, name, country, city, email, contract: partnerContract.value.trim(), active: 1 };
         if (editingPartnerId) managedPartners = managedPartners.map(item =&gt; item.id === editingPartnerId ? record : item);
         else managedPartners.unshift(record);
         const message = editingPartnerId ? &#x27;파트너 정보를 수정했습니다.&#x27; : &#x27;새 파트너를 추가했습니다.&#x27;;
