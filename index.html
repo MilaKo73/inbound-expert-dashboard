@@ -993,7 +993,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;div class=&quot;viz-row&quot;&gt;&lt;h2 id=&quot;partner-manage-title&quot;&gt;해외파트너 디렉토리&lt;/h2&gt;&lt;span class=&quot;viz-badge&quot; id=&quot;partnerManageCount&quot;&gt;0곳&lt;/span&gt;&lt;/div&gt;
     &lt;div class=&quot;viz-controls&quot; aria-label=&quot;파트너 검색 및 입력&quot;&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;partnerSearch&quot;&gt;파트너 검색
-        &lt;input class=&quot;form-control&quot; id=&quot;partnerSearch&quot; type=&quot;search&quot; placeholder=&quot;도시 / 선적항&quot;&gt;
+        &lt;input class=&quot;form-control&quot; id=&quot;partnerSearch&quot; type=&quot;search&quot; placeholder=&quot;파트너 명, 대륙, 도시 / 선적항&quot;&gt;
       &lt;/label&gt;
       &lt;label class=&quot;form-label&quot; for=&quot;partnerCompany&quot;&gt;회사명
         &lt;input class=&quot;form-control&quot; id=&quot;partnerCompany&quot; type=&quot;text&quot; required&gt;
@@ -1014,7 +1014,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;div id=&quot;partnerManageStatus&quot; class=&quot;text-small text-muted&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
     &lt;div class=&quot;table-responsive&quot;&gt;
       &lt;table class=&quot;table table-sm&quot;&gt;
-        &lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;도시 / 선적항&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;관리&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+        &lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;파트너 명&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;대륙&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;도시 / 선적항&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;관리&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
         &lt;tbody id=&quot;partnerManageRows&quot;&gt;&lt;/tbody&gt;
       &lt;/table&gt;
     &lt;/div&gt;
@@ -1143,15 +1143,30 @@ html&gt;body{padding:0}&lt;/style&gt;
         partnerCancelEdit.hidden = false;
         partnerCompany.focus();
       }
+      function continentOf(country) {
+        const value = normalize(country).toLowerCase();
+        const regions = {
+          &#x27;아시아&#x27;: [&#x27;china&#x27;, &#x27;japan&#x27;, &#x27;india&#x27;, &#x27;singapore&#x27;, &#x27;thailand&#x27;, &#x27;bangladesh&#x27;, &#x27;united arab emirates&#x27;, &#x27;uae&#x27;, &#x27;uzbekistan&#x27;, &#x27;taiwan&#x27;, &#x27;indonesia&#x27;, &#x27;lebanon&#x27;, &#x27;iran&#x27;, &#x27;philippines&#x27;, &#x27;saudi arabia&#x27;, &#x27;qatar&#x27;, &#x27;oman&#x27;, &#x27;bahrain&#x27;, &#x27;vietnam&#x27;, &#x27;malaysia&#x27;, &#x27;cambodia&#x27;, &#x27;pakistan&#x27;, &#x27;sri lanka&#x27;, &#x27;jordan&#x27;, &#x27;israel&#x27;, &#x27;turkey&#x27;, &#x27;syria&#x27;, &#x27;mongolia&#x27;, &#x27;bhutan&#x27;, &#x27;laos&#x27;, &#x27;myanmar&#x27;, &#x27;hong kong&#x27;, &#x27;macao&#x27;, &#x27;brunei&#x27;, &#x27;kuwait&#x27;, &#x27;yemen&#x27;, &#x27;azerbaijan&#x27;, &#x27;georgia&#x27;, &#x27;turkmenistan&#x27;, &#x27;korea&#x27;],
+          &#x27;오세아니아&#x27;: [&#x27;australia&#x27;, &#x27;new zealand&#x27;, &#x27;saipan&#x27;, &#x27;guam&#x27;],
+          &#x27;유럽&#x27;: [&#x27;poland&#x27;, &#x27;netherlands&#x27;, &#x27;germany&#x27;, &#x27;belgium&#x27;, &#x27;switzerland&#x27;, &#x27;switzerlands&#x27;, &#x27;italy&#x27;, &#x27;france&#x27;, &#x27;spain&#x27;, &#x27;united kingdom&#x27;, &#x27;sweden&#x27;, &#x27;denmark&#x27;, &#x27;norway&#x27;, &#x27;finland&#x27;, &#x27;austria&#x27;, &#x27;czech&#x27;, &#x27;ukraine&#x27;, &#x27;hungary&#x27;, &#x27;slovenia&#x27;, &#x27;slovakia&#x27;, &#x27;portugal&#x27;, &#x27;estonia&#x27;, &#x27;lithuania&#x27;, &#x27;latvia&#x27;, &#x27;greece&#x27;, &#x27;moldova&#x27;, &#x27;serbia&#x27;, &#x27;albania&#x27;, &#x27;russia&#x27;],
+          &#x27;북미&#x27;: [&#x27;united states&#x27;, &#x27;mexico&#x27;, &#x27;canada&#x27;, &#x27;dominican republic&#x27;, &#x27;panama&#x27;, &#x27;el salvador&#x27;, &#x27;nicaragua&#x27;],
+          &#x27;남미&#x27;: [&#x27;colombia&#x27;, &#x27;peru&#x27;, &#x27;bolivia&#x27;, &#x27;paraguay&#x27;, &#x27;brazil&#x27;, &#x27;chile&#x27;, &#x27;ecuador&#x27;],
+          &#x27;아프리카&#x27;: [&#x27;egypt&#x27;, &#x27;south africa&#x27;, &#x27;mauritius&#x27;, &#x27;senegal&#x27;, &#x27;tunisia&#x27;, &#x27;tunis&#x27;, &#x27;ghana&#x27;]
+        };
+        for (const [region, countries] of Object.entries(regions)) {
+          if (countries.some(name =&gt; value.includes(name))) return region;
+        }
+        return &#x27;기타&#x27;;
+      }
       function renderPartnerManagement() {
         const query = normalize(partnerSearch.value).toLowerCase();
-        const filtered = managedPartners.filter(record =&gt; !query || normalize(record.city).toLowerCase().includes(query));
+        const filtered = managedPartners.filter(record =&gt; !query || [record.name, continentOf(record.country), record.city].some(value =&gt; normalize(value).toLowerCase().includes(query)));
         const visible = filtered.slice(0, 50);
         root.querySelector(&#x27;#partnerManageCount&#x27;).textContent = `${managedPartners.length}곳`;
         partnerManageStatus.textContent = filtered.length &gt; visible.length ? `검색 결과 ${filtered.length}곳 중 50곳을 표시합니다.` : `검색 결과 ${filtered.length}곳`;
         partnerManageRows.replaceChildren(...visible.map(record =&gt; {
           const row = document.createElement(&#x27;tr&#x27;);
-          [record.city].forEach(value =&gt; {
+          [record.name, continentOf(record.country), record.city].forEach(value =&gt; {
             const cell = document.createElement(&#x27;td&#x27;);
             cell.textContent = value;
             row.append(cell);
